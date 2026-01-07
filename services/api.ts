@@ -7,6 +7,15 @@ import { supabase } from './supabase';
 const QUESTIONS_KEY = 'nit_gyanam_questions_v2';
 const SUBMISSIONS_KEY = 'nit_gyanam_submissions_v2';
 
+// Ensure process.env.API_KEY is available during runtime
+const GET_API_KEY = () => {
+  try {
+    return process.env.API_KEY || "";
+  } catch (e) {
+    return "";
+  }
+};
+
 export const api = {
   fetchQuestions: async (): Promise<Question[]> => {
     if (supabase) {
@@ -29,7 +38,6 @@ export const api = {
   },
 
   submitAssessment: async (submission: Submission) => {
-    // 1. Sync to Supabase Cloud
     if (supabase) {
       try {
         const { error } = await supabase.from('submissions').upsert({
@@ -51,7 +59,6 @@ export const api = {
       }
     }
 
-    // 2. Sync to LocalStorage (as backup)
     const saved = localStorage.getItem(SUBMISSIONS_KEY);
     const submissions: Submission[] = saved ? JSON.parse(saved) : [];
     const index = submissions.findIndex(s => s.id === submission.id);
@@ -99,24 +106,24 @@ export const api = {
   },
 
   generateAIAnalysis: async (submission: Submission, questions: Question[]): Promise<string> => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey || apiKey === "undefined") return "AI Service offline.";
-
-    const ai = new GoogleGenAI({ apiKey });
-    const answerEntries = Object.entries(submission.answers || {});
-    const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
-      const q = questions.find(q => q.id === qid);
-      const opt = q?.options.find(o => o.id === ans.optionId);
-      return `[${ans.indicator}] ${q?.textEn}: "${opt?.en}"`;
-    }).join('\n');
-
-    const promptText = `Analyze this student assessment for NitGyanam Portal:
-      Student: ${submission.student.name} (${submission.student.standard})
-      Status: ${submission.riskStatus}
-      Data: ${answerSummary}
-      Provide: Overview, Risk Analysis, Guidance, and Verdict.`;
+    const apiKey = GET_API_KEY();
+    if (!apiKey || apiKey === "undefined") return "AI Service credentials missing.";
 
     try {
+      const ai = new GoogleGenAI({ apiKey });
+      const answerEntries = Object.entries(submission.answers || {});
+      const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
+        const q = questions.find(q => q.id === qid);
+        const opt = q?.options.find(o => o.id === ans.optionId);
+        return `[${ans.indicator}] ${q?.textEn}: "${opt?.en}"`;
+      }).join('\n');
+
+      const promptText = `Analyze this student assessment for NitGyanam Portal:
+        Student: ${submission.student.name} (${submission.student.standard})
+        Status: ${submission.riskStatus}
+        Data: ${answerSummary}
+        Provide: Overview, Risk Analysis, Guidance, and Verdict.`;
+
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: [{ parts: [{ text: promptText }] }],
@@ -124,7 +131,8 @@ export const api = {
       });
       return response.text || "Report generation failed.";
     } catch (error) {
-      return "AI analysis failed.";
+      console.error("AI Error:", error);
+      return "AI analysis failed at runtime.";
     }
   },
 
