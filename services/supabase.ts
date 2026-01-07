@@ -1,47 +1,44 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Try multiple sources for environment variables
-const getEnv = (key: string): string => {
-  // 1. Try process.env (Vite define)
-  // 2. Try import.meta.env (Vite default)
-  // 3. Try with and without VITE_ prefix
-  const val = (process.env as any)[key] || 
-              (process.env as any)[`VITE_${key}`] || 
+/**
+ * NitGyanam Supabase Connector
+ * This helper ensures we pick up keys regardless of the deployment environment.
+ */
+const getVar = (key: string): string => {
+  // Try all possible ways Vite or the host might inject variables
+  const val = (import.meta as any).env?.[`VITE_${key}`] || 
               (import.meta as any).env?.[key] || 
-              (import.meta as any).env?.[`VITE_${key}`];
+              (process.env as any)[`VITE_${key}`] || 
+              (process.env as any)[key];
   
-  return (val && val !== "undefined") ? val : "";
+  return (val && val !== "undefined" && val !== "") ? val : "";
 };
 
-const url = getEnv('SUPABASE_URL');
-const key = getEnv('SUPABASE_ANON_KEY');
+const supabaseUrl = getVar('SUPABASE_URL');
+const supabaseKey = getVar('SUPABASE_ANON_KEY');
 
-/**
- * Diagnostics for the developer
- */
-console.group("NitGyanam Connection Diagnostics");
-console.log("Supabase URL Found:", !!url);
-console.log("Supabase Key Found:", !!key);
-if (url) {
-  try {
-    new URL(url);
-    console.log("URL Format: Valid");
-  } catch (e) {
-    console.error("URL Format: INVALID (Must start with https://)");
-  }
+// Detailed Diagnostics
+console.group("NitGyanam Cloud Status");
+console.log("Check 1: URL ->", supabaseUrl ? "Found ✅" : "MISSING ❌");
+console.log("Check 2: Key ->", supabaseKey ? "Found ✅" : "MISSING ❌");
+
+if (!supabaseUrl || !supabaseKey) {
+  console.warn("NitGyanam: Cloud variables not detected. LocalStorage fallback active.");
+  console.info("To Fix: Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your hosting dashboard.");
 }
 console.groupEnd();
 
-const createSupabaseClient = () => {
-  if (!url || !key) return null;
-
+const createSafeClient = () => {
+  if (!supabaseUrl || !supabaseKey) return null;
   try {
-    return createClient(url, key);
-  } catch (error) {
-    console.error("Supabase Initialization Failed:", error);
+    // Basic URL validation before creating client
+    new URL(supabaseUrl);
+    return createClient(supabaseUrl, supabaseKey);
+  } catch (e) {
+    console.error("NitGyanam: Invalid Supabase URL format provided.");
     return null;
   }
 };
 
-export const supabase = createSupabaseClient();
+export const supabase = createSafeClient();

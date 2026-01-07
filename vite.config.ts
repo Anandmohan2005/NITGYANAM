@@ -6,10 +6,12 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
     
-    // Ensure we have strings even if env variables are missing
-    const apiKey = env.VITE_GEMINI_API_KEY || env.API_KEY || "";
-    const supabaseUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL || "";
-    const supabaseKey = env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || "";
+    // Mapping keys to process.env for the build
+    const config = {
+      apiKey: env.VITE_GEMINI_API_KEY || env.API_KEY || "",
+      supabaseUrl: env.VITE_SUPABASE_URL || env.SUPABASE_URL || "",
+      supabaseKey: env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || ""
+    };
 
     return {
       base: '/',
@@ -19,9 +21,12 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(apiKey),
-        'process.env.SUPABASE_URL': JSON.stringify(supabaseUrl),
-        'process.env.SUPABASE_ANON_KEY': JSON.stringify(supabaseKey),
+        'process.env.API_KEY': JSON.stringify(config.apiKey),
+        'process.env.SUPABASE_URL': JSON.stringify(config.supabaseUrl),
+        'process.env.SUPABASE_ANON_KEY': JSON.stringify(config.supabaseKey),
+        // Adding VITE_ versions just in case
+        'process.env.VITE_SUPABASE_URL': JSON.stringify(config.supabaseUrl),
+        'process.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(config.supabaseKey),
       },
       resolve: {
         alias: {
