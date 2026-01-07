@@ -18,8 +18,12 @@ const GET_API_KEY = () => {
 export const api = {
   fetchQuestions: async (): Promise<Question[]> => {
     if (supabase) {
-      const { data, error } = await supabase.from('questions').select('*');
-      if (!error && data && data.length > 0) return data;
+      try {
+        const { data, error } = await supabase.from('questions').select('*');
+        if (!error && data && data.length > 0) return data;
+      } catch (e) {
+        console.error("Cloud Fetch Error:", e);
+      }
     }
     const saved = localStorage.getItem(QUESTIONS_KEY);
     if (!saved) {
@@ -31,13 +35,17 @@ export const api = {
 
   saveQuestions: async (questions: Question[]) => {
     if (supabase) {
-      await supabase.from('questions').upsert(questions);
+      try {
+        await supabase.from('questions').upsert(questions);
+      } catch (e) {
+        console.error("Cloud Save Error:", e);
+      }
     }
     localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
   },
 
   submitAssessment: async (submission: Submission) => {
-    // 1. Always save to LocalStorage first as a robust backup
+    // 1. Save to LocalStorage always
     const saved = localStorage.getItem(SUBMISSIONS_KEY);
     const submissions: Submission[] = saved ? JSON.parse(saved) : [];
     const index = submissions.findIndex(s => s.id === submission.id);
@@ -48,7 +56,7 @@ export const api = {
     }
     localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(submissions));
 
-    // 2. Try to sync with Supabase if available
+    // 2. Sync to Supabase if available
     if (supabase) {
       try {
         const { error } = await supabase.from('submissions').upsert({
@@ -64,12 +72,11 @@ export const api = {
           ai_report: submission.aiReport,
           timestamp: submission.timestamp
         });
-        if (error) console.error("Supabase Sync Failed:", error.message);
+        if (error) console.error("Cloud Sync Issue:", error.message);
       } catch (e) {
-        console.error("Supabase Connection Error:", e);
+        console.error("Supabase Connection Fail:", e);
       }
     }
-    
     return submission;
   },
 
@@ -77,52 +84,52 @@ export const api = {
     let cloudData: Submission[] = [];
     
     if (supabase) {
-      const { data, error } = await supabase
-        .from('submissions')
-        .select('*')
-        .order('timestamp', { ascending: false });
-      
-      if (!error && data) {
-        cloudData = data.map(d => {
-          // Re-calculate metrics for dashboard consistency
-          const answers = Object.values(d.answers || {}) as any[];
-          return {
-            id: d.id,
-            student: {
-              name: d.student_name,
-              age: d.student_age,
-              standard: d.student_standard,
-              school: d.student_school
-            },
-            level: d.level,
-            answers: d.answers,
-            riskStatus: d.risk_status,
-            conclusion: d.conclusion,
-            aiReport: d.ai_report,
-            timestamp: d.timestamp,
-            metrics: {
-              totalQuestions: answers.length,
-              healthyCount: answers.filter(a => a.indicator === ResponseIndicator.HEALTHY).length,
-              concernCount: answers.filter(a => a.indicator === ResponseIndicator.CONCERN).length,
-              redFlagCount: answers.filter(a => a.indicator === ResponseIndicator.RED_FLAG).length,
-            }
-          };
-        });
+      try {
+        const { data, error } = await supabase
+          .from('submissions')
+          .select('*')
+          .order('timestamp', { ascending: false });
+        
+        if (!error && data) {
+          cloudData = data.map(d => {
+            const answers = Object.values(d.answers || {}) as any[];
+            return {
+              id: d.id,
+              student: {
+                name: d.student_name,
+                age: d.student_age,
+                standard: d.student_standard,
+                school: d.student_school
+              },
+              level: d.level,
+              answers: d.answers,
+              riskStatus: d.risk_status,
+              conclusion: d.conclusion,
+              aiReport: d.ai_report,
+              timestamp: d.timestamp,
+              metrics: {
+                totalQuestions: answers.length,
+                healthyCount: answers.filter(a => a.indicator === ResponseIndicator.HEALTHY).length,
+                concernCount: answers.filter(a => a.indicator === ResponseIndicator.CONCERN).length,
+                redFlagCount: answers.filter(a => a.indicator === ResponseIndicator.RED_FLAG).length,
+              }
+            };
+          });
+        }
+      } catch (e) {
+        console.error("Cloud Fetch Error:", e);
       }
     }
 
-    // Merge with local data (Cloud takes priority for the same ID)
     const localSaved = localStorage.getItem(SUBMISSIONS_KEY);
     const localData: Submission[] = localSaved ? JSON.parse(localSaved) : [];
     
-    const combined = [...cloudData];
-    localData.forEach(l => {
-      if (!combined.find(c => c.id === l.id)) {
-        combined.push(l);
-      }
-    });
+    // ID collision check: Cloud data takes priority
+    const combinedMap = new Map();
+    localData.forEach(l => combinedMap.set(l.id, l));
+    cloudData.forEach(c => combinedMap.set(c.id, c));
 
-    return combined.sort((a, b) => b.timestamp - a.timestamp);
+    return Array.from(combinedMap.values()).sort((a, b) => b.timestamp - a.timestamp);
   },
 
   syncLocalData: async (): Promise<{ success: number, failed: number }> => {

@@ -4,14 +4,10 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
-    // Load env file based on `mode` in the current working directory.
-    // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
     const env = loadEnv(mode, process.cwd(), '');
     
-    // Support multiple naming conventions for environment variables
-    const apiKey = env.VITE_GEMINI_API_KEY || env.API_KEY || "AIzaSyC8s_IxQn8GyLCHlKdf9uUARLjL2OJfrZ4";
-    
-    // Explicitly set to empty string if not found to avoid "undefined" string literal
+    // Ensure we have strings even if env variables are missing
+    const apiKey = env.VITE_GEMINI_API_KEY || env.API_KEY || "";
     const supabaseUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL || "";
     const supabaseKey = env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || "";
 
