@@ -1,0 +1,20 @@
+
+/* NitGyanam Base Styles */
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3A86FF;
+  border-radius: 10px;
+}

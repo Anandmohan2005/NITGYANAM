@@ -17,7 +17,7 @@
             colors: {
               gold: '#FFD700',
               charcoal: '#0A0A0A',
-              premiumWhite: '#F0F4F8', // Soft Blue-White
+              premiumWhite: '#F0F4F8',
               softGray: '#E1E8F0',
               wellBeingBlue: '#3A86FF',
               wellBeingGreen: '#06D6A0',
@@ -38,16 +38,13 @@
       }
     </script>
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
         body {
             background-color: #F0F4F8;
             color: #1A1A1A;
             -webkit-font-smoothing: antialiased;
             font-family: 'Poppins', sans-serif;
         }
-        
         .mesh-gradient {
             background-color: #F0F4F8;
             background-image: 
@@ -56,13 +53,11 @@
                 radial-gradient(at 100% 100%, hsla(210, 100%, 80%, 0.15) 0px, transparent 50%),
                 radial-gradient(at 0% 100%, hsla(160, 100%, 80%, 0.1) 0px, transparent 50%);
         }
-
         .text-gradient-hero {
           background: linear-gradient(135deg, #1A1A1A 0%, #3A86FF 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
-
         .glass-hero-card {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(30px);
@@ -70,7 +65,6 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
             box-shadow: 0 10px 40px -10px rgba(58, 134, 255, 0.1);
         }
-
         .waves {
           position: relative;
           width: 100%;
@@ -90,31 +84,29 @@
           0% { transform: translate3d(-90px,0,0); }
           100% { transform: translate3d(85px,0,0); }
         }
-
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #F0F4F8; }
         ::-webkit-scrollbar-thumb { background: #3A86FF; border-radius: 10px; }
     </style>
+    <link rel="stylesheet" href="/index.css">
 <script type="importmap">
 {
   "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "framer-motion": "https://esm.sh/framer-motion@^11.11.11",
     "path": "https://esm.sh/path@^0.12.7",
-    "vite": "https://esm.sh/vite@^7.3.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "url": "https://esm.sh/url@^0.11.4",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.45.4"
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "framer-motion": "https://esm.sh/framer-motion@^12.24.8",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body class="mesh-gradient">
     <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
