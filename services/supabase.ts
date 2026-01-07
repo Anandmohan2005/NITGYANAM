@@ -1,36 +1,47 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Get values from process.env (injected by Vite)
-const rawUrl = process.env.SUPABASE_URL;
-const rawKey = process.env.SUPABASE_ANON_KEY;
+// Try multiple sources for environment variables
+const getEnv = (key: string): string => {
+  // 1. Try process.env (Vite define)
+  // 2. Try import.meta.env (Vite default)
+  // 3. Try with and without VITE_ prefix
+  const val = (process.env as any)[key] || 
+              (process.env as any)[`VITE_${key}`] || 
+              (import.meta as any).env?.[key] || 
+              (import.meta as any).env?.[`VITE_${key}`];
+  
+  return (val && val !== "undefined") ? val : "";
+};
+
+const url = getEnv('SUPABASE_URL');
+const key = getEnv('SUPABASE_ANON_KEY');
 
 /**
- * Validates the configuration before attempting to create the client.
- * This prevents the 'Failed to construct URL' error.
+ * Diagnostics for the developer
  */
-const getValidSupabaseClient = () => {
-  if (!rawUrl || rawUrl === "" || rawUrl === "undefined") return null;
-  if (!rawKey || rawKey === "" || rawKey === "undefined") return null;
+console.group("NitGyanam Connection Diagnostics");
+console.log("Supabase URL Found:", !!url);
+console.log("Supabase Key Found:", !!key);
+if (url) {
+  try {
+    new URL(url);
+    console.log("URL Format: Valid");
+  } catch (e) {
+    console.error("URL Format: INVALID (Must start with https://)");
+  }
+}
+console.groupEnd();
+
+const createSupabaseClient = () => {
+  if (!url || !key) return null;
 
   try {
-    // Check if the URL is actually valid
-    new URL(rawUrl);
-    
-    // If we reach here, strings exist and URL is valid. 
-    // Now create the client with a safety wrapper.
-    return createClient(rawUrl, rawKey);
+    return createClient(url, key);
   } catch (error) {
-    console.warn("NitGyanam: Invalid Supabase configuration format detected. Falling back to local mode.");
+    console.error("Supabase Initialization Failed:", error);
     return null;
   }
 };
 
-export const supabase = getValidSupabaseClient();
-
-// Developer logging
-if (supabase) {
-  console.info("NitGyanam: Cloud Database Connection established.");
-} else {
-  console.info("NitGyanam: Running in LocalStorage mode (Cloud DB variables missing).");
-}
+export const supabase = createSupabaseClient();

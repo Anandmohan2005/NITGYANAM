@@ -1,3 +1,4 @@
+
 /**
  * NITGYANAM WELL-BEING PORTAL - TECHNICAL ARCHITECTURE
  * ---------------------------------------------------
@@ -17,6 +18,7 @@ import QuestionManager from './components/QuestionManager';
 import Auth from './components/Auth';
 import Hero from './components/Hero';
 import { User, UserRole, WellBeingLevel, Submission } from './types';
+import { supabase } from './services/supabase';
 
 type AppView = 'home' | 'quiz' | 'login' | 'dashboard' | 'manager';
 
@@ -132,8 +134,6 @@ const App: React.FC = () => {
         );
       case 'quiz':
         return <Quiz onComplete={(submission: Submission) => {
-          // Stay on quiz page to show completion screen, 
-          // or navigate away only when user explicitly clicks "Finish and Return"
           console.log("Assessment logged:", submission.id);
         }} />;
       case 'login':
@@ -178,23 +178,24 @@ const App: React.FC = () => {
             <div className="flex justify-between items-center mb-10 border-b border-white/10 pb-6">
               <div>
                 <h4 className="text-gold font-black uppercase tracking-widest text-xs">Developer Console</h4>
-                <p className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-tighter italic">Inspection: Local Storage Mode</p>
+                <p className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-tighter italic">Diagnostic Mode</p>
               </div>
               <button onClick={() => setShowDebug(false)} className="text-white/40 hover:text-white font-black text-xs">CLOSE [X]</button>
             </div>
 
             <div className="space-y-10 font-mono text-[10px]">
               <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
-                <p className="text-wellBeingGreen mb-4 font-bold uppercase tracking-widest">Active State</p>
+                <p className="text-wellBeingGreen mb-4 font-bold uppercase tracking-widest text-[9px]">Connection Status</p>
                 <div className="space-y-2 text-gray-400">
-                   <p>View: <span className="text-white">{activeView}</span></p>
-                   <p>User: <span className="text-white">{user ? user.username : 'Guest'}</span></p>
-                   <p>Role: <span className="text-white">{user ? user.role : 'N/A'}</span></p>
+                   <p className="flex justify-between">Cloud Database: <span className={supabase ? "text-emerald-400 font-black" : "text-red-400 font-black"}>{supabase ? 'CONNECTED' : 'DISCONNECTED'}</span></p>
+                   <p className="flex justify-between">URL Loaded: <span className="text-white">{process.env.SUPABASE_URL ? 'YES' : 'NO'}</span></p>
+                   <p className="flex justify-between">Key Loaded: <span className="text-white">{process.env.SUPABASE_ANON_KEY ? 'YES' : 'NO'}</span></p>
+                   {!supabase && <p className="text-[8px] mt-4 text-amber-500/80 leading-relaxed italic border-t border-white/5 pt-4">Tip: Ensure your environment variables use the VITE_ prefix if standard names aren't working.</p>}
                 </div>
               </div>
 
               <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
-                <p className="text-wellBeingBlue mb-4 font-bold uppercase tracking-widest">LocalStorage DB (Submissions)</p>
+                <p className="text-wellBeingBlue mb-4 font-bold uppercase tracking-widest text-[9px]">Local Data Store</p>
                 <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                   <pre className="text-[8px] leading-tight text-gold/80">
                     {JSON.stringify(JSON.parse(localStorage.getItem('nit_gyanam_submissions_v2') || '[]'), null, 2)}
