@@ -7,7 +7,6 @@ import { supabase } from './supabase';
 const QUESTIONS_KEY = 'nit_gyanam_questions_v2';
 const SUBMISSIONS_KEY = 'nit_gyanam_submissions_v2';
 
-// Ensure process.env.API_KEY is available during runtime
 const GET_API_KEY = () => {
   try {
     return process.env.API_KEY || "";
@@ -38,6 +37,18 @@ export const api = {
   },
 
   submitAssessment: async (submission: Submission) => {
+    // 1. Always save to LocalStorage first as a robust backup
+    const saved = localStorage.getItem(SUBMISSIONS_KEY);
+    const submissions: Submission[] = saved ? JSON.parse(saved) : [];
+    const index = submissions.findIndex(s => s.id === submission.id);
+    if (index !== -1) {
+      submissions[index] = submission;
+    } else {
+      submissions.unshift(submission);
+    }
+    localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(submissions));
+
+    // 2. Try to sync with Supabase if available
     if (supabase) {
       try {
         const { error } = await supabase.from('submissions').upsert({
@@ -53,26 +64,18 @@ export const api = {
           ai_report: submission.aiReport,
           timestamp: submission.timestamp
         });
-        if (error) console.error("Supabase Error:", error.message);
+        if (error) console.error("Supabase Sync Failed:", error.message);
       } catch (e) {
-        console.error("Connection error to Supabase:", e);
+        console.error("Supabase Connection Error:", e);
       }
     }
-
-    const saved = localStorage.getItem(SUBMISSIONS_KEY);
-    const submissions: Submission[] = saved ? JSON.parse(saved) : [];
-    const index = submissions.findIndex(s => s.id === submission.id);
-    if (index !== -1) {
-      submissions[index] = submission;
-    } else {
-      submissions.unshift(submission);
-    }
-    localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(submissions));
     
     return submission;
   },
 
   fetchSubmissions: async (): Promise<Submission[]> => {
+    let cloudData: Submission[] = [];
+    
     if (supabase) {
       const { data, error } = await supabase
         .from('submissions')
@@ -80,29 +83,80 @@ export const api = {
         .order('timestamp', { ascending: false });
       
       if (!error && data) {
-        return data.map(d => ({
-          id: d.id,
-          student: {
-            name: d.student_name,
-            age: d.student_age,
-            standard: d.student_standard,
-            school: d.student_school
-          },
-          level: d.level,
-          answers: d.answers,
-          riskStatus: d.risk_status,
-          conclusion: d.conclusion,
-          aiReport: d.ai_report,
-          timestamp: d.timestamp,
-          metrics: {
-            totalQuestions: Object.keys(d.answers || {}).length,
-            healthyCount: 0, concernCount: 0, redFlagCount: 0 
-          }
-        }));
+        cloudData = data.map(d => {
+          // Re-calculate metrics for dashboard consistency
+          const answers = Object.values(d.answers || {}) as any[];
+          return {
+            id: d.id,
+            student: {
+              name: d.student_name,
+              age: d.student_age,
+              standard: d.student_standard,
+              school: d.student_school
+            },
+            level: d.level,
+            answers: d.answers,
+            riskStatus: d.risk_status,
+            conclusion: d.conclusion,
+            aiReport: d.ai_report,
+            timestamp: d.timestamp,
+            metrics: {
+              totalQuestions: answers.length,
+              healthyCount: answers.filter(a => a.indicator === ResponseIndicator.HEALTHY).length,
+              concernCount: answers.filter(a => a.indicator === ResponseIndicator.CONCERN).length,
+              redFlagCount: answers.filter(a => a.indicator === ResponseIndicator.RED_FLAG).length,
+            }
+          };
+        });
       }
     }
-    const saved = localStorage.getItem(SUBMISSIONS_KEY);
-    return saved ? JSON.parse(saved) : [];
+
+    // Merge with local data (Cloud takes priority for the same ID)
+    const localSaved = localStorage.getItem(SUBMISSIONS_KEY);
+    const localData: Submission[] = localSaved ? JSON.parse(localSaved) : [];
+    
+    const combined = [...cloudData];
+    localData.forEach(l => {
+      if (!combined.find(c => c.id === l.id)) {
+        combined.push(l);
+      }
+    });
+
+    return combined.sort((a, b) => b.timestamp - a.timestamp);
+  },
+
+  syncLocalData: async (): Promise<{ success: number, failed: number }> => {
+    if (!supabase) return { success: 0, failed: 0 };
+    
+    const localSaved = localStorage.getItem(SUBMISSIONS_KEY);
+    if (!localSaved) return { success: 0, failed: 0 };
+    
+    const localData: Submission[] = JSON.parse(localSaved);
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const s of localData) {
+      try {
+        const { error } = await supabase.from('submissions').upsert({
+          id: s.id,
+          student_name: s.student.name,
+          student_age: s.student.age,
+          student_standard: s.student.standard,
+          student_school: s.student.school,
+          level: s.level,
+          answers: s.answers,
+          risk_status: s.riskStatus,
+          conclusion: s.conclusion,
+          ai_report: s.aiReport,
+          timestamp: s.timestamp
+        });
+        if (error) failedCount++;
+        else successCount++;
+      } catch {
+        failedCount++;
+      }
+    }
+    return { success: successCount, failed: failedCount };
   },
 
   generateAIAnalysis: async (submission: Submission, questions: Question[]): Promise<string> => {

@@ -16,19 +16,30 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [isLive, setIsLive] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const loadData = async () => {
+    const [sData, qData] = await Promise.all([
+      api.fetchSubmissions(),
+      api.fetchQuestions()
+    ]);
+    setSubmissions(sData);
+    setQuestions(qData);
+    setIsLive(!!supabase);
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      const [sData, qData] = await Promise.all([
-        api.fetchSubmissions(),
-        api.fetchQuestions()
-      ]);
-      setSubmissions(sData);
-      setQuestions(qData);
-      setIsLive(!!supabase);
-    };
     loadData();
   }, []);
+
+  const handleSync = async () => {
+    if (!isLive || isSyncing) return;
+    setIsSyncing(true);
+    const result = await api.syncLocalData();
+    alert(`Sync Complete: ${result.success} records uploaded, ${result.failed} failed.`);
+    await loadData();
+    setIsSyncing(false);
+  };
 
   const handleRegenerate = async () => {
     if (!selectedSubmission || isRegenerating) return;
@@ -39,7 +50,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       const updatedSubmission = { ...selectedSubmission, aiReport: newReport };
       await api.submitAssessment(updatedSubmission);
       
-      // Update state
       setSubmissions(prev => prev.map(s => s.id === selectedSubmission.id ? updatedSubmission : s));
       setSelectedSubmission(updatedSubmission);
     } catch (e) {
@@ -75,19 +85,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
           </div>
           <p className="text-slate-400 font-medium mt-3 text-lg italic">Tracking Well-Being for: <span className="text-wellBeingBlue font-black">{user.username}</span></p>
         </div>
-        <div className="flex bg-white shadow-sm border border-slate-100 p-2 rounded-full">
-          <button 
-            onClick={() => setFilter('all')}
-            className={`px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-wellBeingBlue text-white shadow-md' : 'text-slate-400 hover:text-wellBeingBlue'}`}
-          >
-            All Submissions
-          </button>
-          <button 
-            onClick={() => setFilter('CRITICAL')}
-            className={`px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${filter === 'CRITICAL' ? 'bg-red-500 text-white shadow-md' : 'text-slate-400 hover:text-red-500'}`}
-          >
-            Red Flags Only
-          </button>
+        
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          {isLive && (
+            <button 
+              onClick={handleSync}
+              disabled={isSyncing}
+              className={`px-8 py-4 rounded-full text-[11px] font-black uppercase tracking-widest transition-all bg-emerald-600 text-white shadow-lg hover:bg-emerald-700 flex items-center justify-center space-x-2 ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isSyncing ? <span>Syncing...</span> : <span>☁️ Sync Local Data</span>}
+            </button>
+          )}
+          <div className="flex bg-white shadow-sm border border-slate-100 p-2 rounded-full">
+            <button 
+              onClick={() => setFilter('all')}
+              className={`px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-wellBeingBlue text-white shadow-md' : 'text-slate-400 hover:text-wellBeingBlue'}`}
+            >
+              All
+            </button>
+            <button 
+              onClick={() => setFilter('CRITICAL')}
+              className={`px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${filter === 'CRITICAL' ? 'bg-red-500 text-white shadow-md' : 'text-slate-400 hover:text-red-500'}`}
+            >
+              Red Flags
+            </button>
+          </div>
         </div>
       </div>
 
