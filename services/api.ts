@@ -7,7 +7,7 @@ import { supabase } from './supabase';
 const QUESTIONS_KEY = 'nit_gyanam_questions_v2';
 const SUBMISSIONS_KEY = 'nit_gyanam_submissions_v2';
 
-// Fixed: Strictly follow API key retrieval guideline to use process.env.API_KEY
+// Strictly follow API key retrieval guideline to use process.env.API_KEY
 const GET_API_KEY = () => {
   return process.env.API_KEY || "";
 };
@@ -137,7 +137,6 @@ export const api = {
 
     for (const s of localData) {
       try {
-        // Fixed: Use correct camelCase property names from Submission interface (riskStatus and aiReport)
         const { error } = await supabase.from('submissions').upsert({
           id: s.id,
           student_name: s.student.name,
@@ -163,12 +162,10 @@ export const api = {
   generateAIAnalysis: async (submission: Submission, questions: Question[]): Promise<string> => {
     const apiKey = GET_API_KEY();
     if (!apiKey) {
-      console.error("NitGyanam: Gemini API Key is missing. Check your environment variables.");
-      return "AI Service credentials missing. Please configure your API key.";
+      return "ACTION REQUIRED: Gemini API Key is missing. Please set the API_KEY environment variable.";
     }
 
     try {
-      // Fixed: Initialize GoogleGenAI with the recommended object structure
       const ai = new GoogleGenAI({ apiKey });
       const answerEntries = Object.entries(submission.answers || {});
       const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
@@ -189,7 +186,6 @@ export const api = {
         3. Recommended Actions for Faculty
         4. Summary Verdict.`;
 
-      // Fixed: Call generateContent with both model name and prompt in a single call as per guideline
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: promptText,
@@ -200,25 +196,20 @@ export const api = {
         }
       });
       
-      // Fixed: Access the .text property directly (not a method call)
       const text = response.text;
       if (!text) {
         throw new Error("Empty response received from AI model.");
       }
       return text;
     } catch (error: any) {
-      console.error("NitGyanam AI Full Error Context:", error);
-      let errorMessage = "AI analysis failed at runtime.";
+      console.error("NitGyanam AI Full Error:", error);
       
-      if (error?.message?.includes("API key not valid")) {
-        errorMessage = "Error: Invalid Gemini API Key. Please verify your credentials.";
-      } else if (error?.message?.includes("User location is not supported")) {
-        errorMessage = "Error: Gemini API is not available in your current region.";
-      } else if (error?.message) {
-        errorMessage = `AI Error: ${error.message}`;
+      // Specific handling for leaked key error
+      if (error?.message?.includes("leaked") || (error?.status === "PERMISSION_DENIED" && error?.message?.includes("key"))) {
+        return "CRITICAL ERROR: Your API Key was reported as leaked and has been disabled by Google. ACTION REQUIRED: Please generate a NEW API Key in Google AI Studio and update your environment variables.";
       }
-      
-      return errorMessage;
+
+      return `AI Analysis Error: ${error?.message || "Internal Runtime Failure"}`;
     }
   },
 

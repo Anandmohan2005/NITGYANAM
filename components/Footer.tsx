@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { BRANDING } from '../constants';
 
 const Footer: React.FC = () => {
-  // Developer Photo Placeholder - High-quality clinical portal branding
+  // Founder Photo - Actual image of Anand Mohan
   const anandPhotoUrl = 'https://media.licdn.com/dms/image/v2/D5603AQExU4z0pWj3vA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1709404285709?e=1746057600&v=beta&t=v_fC_M39lR7k8j-y7X7-vH8g1YfVzY8V8-v_v_v_v_v';
 
   return (
@@ -47,9 +47,9 @@ const Footer: React.FC = () => {
             <h4 className="text-gold font-black uppercase tracking-[0.3em] text-xs">Founder</h4>
             <div className="flex items-center space-x-5 group">
               <div className="relative">
-                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-gold/30 rotate-3 group-hover:rotate-0 transition-transform duration-500 shadow-xl">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-gold/30 rotate-3 group-hover:rotate-0 transition-transform duration-500 shadow-xl bg-white">
                   <img 
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&q=80&w=200&h=200" 
+                    src={anandPhotoUrl} 
                     alt="Anand Mohan" 
                     className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
                     onError={(e) => {
