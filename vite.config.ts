@@ -4,7 +4,8 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, process.cwd(), '');
+    // Fix: Replaced process.cwd() with '.' to avoid "Property 'cwd' does not exist" type error and target current project root
+    const env = loadEnv(mode, '.', '');
     
     // Mapping keys to process.env for the build
     const config = {
@@ -30,7 +31,8 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, '.'),
+          // Fix: Replaced __dirname with path.resolve('.') as __dirname is not defined in ES modules
+          '@': path.resolve('.'),
         }
       },
       build: {
