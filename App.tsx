@@ -15,7 +15,6 @@ import Layout from './components/Layout';
 import Quiz from './components/Quiz';
 import AdminDashboard from './components/AdminDashboard';
 import QuestionManager from './components/QuestionManager';
-import FounderSection from './components/FounderSection';
 import Auth from './components/Auth';
 import Hero from './components/Hero';
 import { User, UserRole, WellBeingLevel, Submission } from './types';
@@ -131,8 +130,6 @@ const App: React.FC = () => {
                 ))}
               </div>
             </section>
-
-            <FounderSection />
           </div>
         );
       case 'quiz':

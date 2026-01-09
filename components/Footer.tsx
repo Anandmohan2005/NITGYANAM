@@ -4,18 +4,12 @@ import { motion } from 'framer-motion';
 import { BRANDING } from '../constants';
 
 const Footer: React.FC = () => {
-  // Founder Photo - Updated to local reference
-  const founderPhotoUrl = '/founder.jpg';
-  const fallbackUrl = 'https://ui-avatars.com/api/?name=Anand+Mohan&background=FFD700&color=0A0A0A&bold=true';
-
   return (
     <footer className="bg-charcoal text-white py-20 border-t border-white/5 relative overflow-hidden">
-      {/* Background Decorative Element */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-          {/* Mission Column */}
           <div className="space-y-6">
             <h4 className="text-gold font-black uppercase tracking-[0.3em] text-xs">Mission</h4>
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
@@ -28,7 +22,6 @@ const Footer: React.FC = () => {
             </div>
           </div>
           
-          {/* Contact Column */}
           <div className="space-y-6">
             <h4 className="text-gold font-black uppercase tracking-[0.3em] text-xs">Contact</h4>
             <div className="space-y-4">
@@ -43,33 +36,23 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Founder Column */}
           <div className="space-y-6">
             <h4 className="text-gold font-black uppercase tracking-[0.3em] text-xs">Founder</h4>
             <div className="flex items-center space-x-5 group">
               <div className="relative">
-                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-gold/30 rotate-3 group-hover:rotate-0 transition-transform duration-500 shadow-xl bg-white">
-                  <img 
-                    src={founderPhotoUrl} 
-                    alt="Anand Mohan" 
-                    className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = fallbackUrl;
-                    }}
-                  />
+                <div className="w-16 h-16 rounded-2xl bg-gold flex items-center justify-center text-charcoal font-black text-xl shadow-xl group-hover:scale-105 transition-transform duration-500">
+                  AM
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-wellBeingGreen border-2 border-charcoal rounded-full" title="Active Management" />
               </div>
               <div className="space-y-1">
                 <p className="text-lg font-black uppercase tracking-tighter text-white">Anand Mohan</p>
                 <p className="text-gold text-[9px] font-black uppercase tracking-[0.3em]">Project Director & Lead Developer</p>
-                <p className="text-signature text-gold/60 text-xl font-signature pt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-700">Anand Mohan</p>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Bottom Bar */}
         <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-2">
             <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.4em]">

@@ -202,13 +202,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
               exit={{ scale: 0.95, opacity: 0, y: 30 }} 
               className="fixed inset-4 md:inset-10 lg:inset-20 m-auto w-full max-w-5xl h-fit max-h-[90vh] bg-white rounded-[3rem] z-[2200] shadow-2xl overflow-hidden flex flex-col"
             >
-              {/* Header - Matching requested style */}
               <div className="bg-[#0A0A0A] px-10 py-10 text-white flex justify-between items-start shrink-0">
                 <div className="flex items-center space-x-6">
-                  <div className="w-14 h-14 bg-wellBeingBlue rounded-2xl flex items-center justify-center text-3xl shadow-lg">📄</div>
+                  <div className="w-16 h-16 bg-gold rounded-2xl flex items-center justify-center text-charcoal font-black text-xl shadow-xl">
+                    AM
+                  </div>
                   <div>
-                    <h3 className="text-3xl font-black uppercase tracking-tighter leading-none">Behavioral Assessment Record</h3>
-                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.4em] mt-3">NitGyanam Well-Being Framework</p>
+                    <h3 className="text-3xl font-black uppercase tracking-tighter leading-none">Behavioral Record</h3>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.4em] mt-3">Verified by: Anand Mohan</p>
                   </div>
                 </div>
                 <button 
@@ -219,10 +220,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                 </button>
               </div>
 
-              {/* Scrollable Content Area */}
               <div className="flex-grow overflow-y-auto p-12 md:p-16 custom-scrollbar bg-white">
                 <div className="max-w-4xl mx-auto space-y-12">
-                   {/* Info Matrix */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-10 border-b border-slate-100">
                     <div>
                       <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Full Name</p>
@@ -247,7 +246,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                     </div>
                   </div>
 
-                  {/* Student Feedback */}
                   {selectedSubmission.feedback && (
                     <div className="bg-amber-50/50 border border-amber-100 p-8 rounded-[2.5rem]">
                         <h4 className="text-[10px] font-black uppercase text-amber-600 tracking-widest mb-4">Student Self-Disclosure</h4>
@@ -255,7 +253,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                     </div>
                   )}
 
-                  {/* Main Analysis Text */}
                   <div className="prose prose-slate prose-xl max-w-none">
                     <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed border-l-4 border-slate-100 pl-10 py-4">
                       {selectedSubmission.aiReport ? selectedSubmission.aiReport : "Analyzing behavioral markers..."}
@@ -264,40 +261,32 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                 </div>
               </div>
 
-              {/* Footer Actions - Matching requested style */}
-              <div className="px-10 py-8 bg-white border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6 shrink-0">
-                <div className="flex flex-col">
-                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">Confidential Diagnostic Document</p>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Authorized Reviewer: <span className="text-wellBeingBlue">{user.username}</span></p>
-                </div>
-                
-                <div className="flex flex-wrap justify-center gap-4">
-                  <button 
-                    disabled={isRegenerating} 
-                    onClick={handleRegenerate} 
-                    className={`flex items-center space-x-3 px-8 py-4 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 shadow-sm transition-all ${
-                      isRegenerating ? 'opacity-50' : 'hover:border-wellBeingBlue hover:text-wellBeingBlue hover:bg-wellBeingBlue/5'
-                    }`}
-                  >
-                    {isRegenerating ? (
-                      <div className="w-4 h-4 border-2 border-wellBeingBlue border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <span className="flex items-center"><span className="mr-2">🔄</span> Regenerate Analysis</span>
-                    )}
-                  </button>
-                  <button 
-                    onClick={() => window.print()} 
-                    className="px-8 py-4 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-                  >
-                    Print Record
-                  </button>
-                  <button 
-                    onClick={() => setSelectedSubmission(null)} 
-                    className="bg-[#0A0A0A] text-white px-12 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95"
-                  >
-                    Close
-                  </button>
-                </div>
+              <div className="px-10 py-8 bg-white border-t border-slate-50 flex flex-col md:flex-row justify-end gap-4 shrink-0">
+                <button 
+                  disabled={isRegenerating} 
+                  onClick={handleRegenerate} 
+                  className={`flex items-center space-x-3 px-8 py-4 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 shadow-sm transition-all ${
+                    isRegenerating ? 'opacity-50' : 'hover:border-wellBeingBlue hover:text-wellBeingBlue hover:bg-wellBeingBlue/5'
+                  }`}
+                >
+                  {isRegenerating ? (
+                    <div className="w-4 h-4 border-2 border-wellBeingBlue border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span className="flex items-center"><span className="mr-2">🔄</span> Regenerate Analysis</span>
+                  )}
+                </button>
+                <button 
+                  onClick={() => window.print()} 
+                  className="px-8 py-4 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                >
+                  Print Record
+                </button>
+                <button 
+                  onClick={() => setSelectedSubmission(null)} 
+                  className="bg-[#0A0A0A] text-white px-12 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95"
+                >
+                  Close
+                </button>
               </div>
             </motion.div>
           </>
