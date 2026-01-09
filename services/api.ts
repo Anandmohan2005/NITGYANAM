@@ -1,3 +1,4 @@
+
 import { Question, Submission, ResponseIndicator, WellBeingLevel } from '../types';
 import { QUIZ_DATA } from '../constants';
 import { GoogleGenAI } from "@google/genai";
@@ -131,7 +132,6 @@ export const api = {
 
     for (const s of localData) {
       try {
-        // Fix: accessing student details from nested student object and using camelCase properties
         const { error } = await supabase.from('submissions').upsert({
           id: s.id,
           student_name: s.student.name,
@@ -225,21 +225,12 @@ export const api = {
         ${answerSummary}
 
         TASK:
-        Generate a comprehensive Clinical Synthesis Report. 
-        Ensure you explicitly address the 4 categories above. 
-        Be extremely vigilant for any "RED FLAG" indicators, especially regarding Future Hopelessness (Category 4).
-        
-        REPORT STRUCTURE:
-        - CLINICAL SUMMARY: High-level overview of the student's psychological profile.
-        - CATEGORICAL BREAKDOWN: Detailed analysis of Behaviour, Mental Health, and Concerns.
-        - RISK ASSESSMENT: Specific identification of any Red Flags or clinical warnings.
-        - ACTIONABLE RECOMMENDATIONS: Clear next steps for faculty and parents.
-        - FINAL VERDICT: Professional closing statement.
+        Generate a comprehensive Clinical Synthesis Report. Ensure Category 4 (RED FLAGS) is addressed with extreme vigilance.
       `;
 
-      // Always use ai.models.generateContent for Gemini 3 series
+      // Switching to 'gemini-3-flash-preview' as it has much higher rate limits for the free tier.
       const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-3-flash-preview',
         contents: promptText,
         config: { 
           temperature: 0.6,
@@ -248,10 +239,13 @@ export const api = {
         }
       });
       
-      // Use .text property to access response
       return response.text || "Diagnostic failure - Empty report.";
     } catch (error: any) {
       console.error("AI Analysis Error:", error);
+      // Friendly message for quota errors
+      if (error?.message?.includes('429') || error?.message?.includes('quota')) {
+        return "NitGyanam System Alert: Clinical server is currently at peak capacity. Please wait 60 seconds and click 'Regenerate Analysis' to refresh this record.";
+      }
       return `Clinical Synthesis Error: ${error?.message || "Internal failure"}`;
     }
   },
