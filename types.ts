@@ -57,7 +57,8 @@ export interface Submission {
     totalQuestions: number;
   };
   conclusion: string;
-  aiReport?: string; // AI generated psychological report
+  aiReport?: string;
+  feedback?: string; // Added student feedback field
   riskStatus: 'STABLE' | 'MODERATE' | 'CRITICAL';
   timestamp: number;
 }

@@ -1,4 +1,3 @@
-
 import { Question, Submission, ResponseIndicator, WellBeingLevel } from '../types';
 import { QUIZ_DATA } from '../constants';
 import { GoogleGenAI } from "@google/genai";
@@ -132,6 +131,7 @@ export const api = {
 
     for (const s of localData) {
       try {
+        // Fix: accessing student details from nested student object and using camelCase properties
         const { error } = await supabase.from('submissions').upsert({
           id: s.id,
           student_name: s.student.name,
@@ -142,7 +142,6 @@ export const api = {
           answers: s.answers,
           risk_status: s.riskStatus,
           conclusion: s.conclusion,
-          // Corrected property from s.ai_report to s.aiReport
           ai_report: s.aiReport,
           timestamp: s.timestamp
         });
@@ -157,7 +156,7 @@ export const api = {
 
   generateAIAnalysis: async (submission: Submission, questions: Question[]): Promise<string> => {
     if (!process.env.API_KEY) {
-      return "CRITICAL: API_KEY is missing from environment variables. Please configure the key in your hosting dashboard.";
+      return "CRITICAL: API_KEY is missing from environment variables.";
     }
 
     try {
@@ -166,44 +165,94 @@ export const api = {
       const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
         const q = questions.find(q => q.id === qid);
         const opt = q?.options.find(o => o.id === ans.optionId);
-        return `[${ans.indicator}] ${q?.textEn}: "${opt?.en}"`;
+        return `[Indicator: ${ans.indicator}] Q: ${q?.textEn} -> Answer: "${opt?.en}"`;
       }).join('\n');
 
-      const promptText = `Analyze this student assessment for NitGyanam Portal:
-        Student: ${submission.student.name} (${submission.student.standard})
-        Risk Status: ${submission.riskStatus}
-        Clinical Findings Summary:
-        ${answerSummary}
-        
-        Provide a concise clinical report including:
-        1. Psychological Overview
-        2. Specific Risk Markers identified
-        3. Recommended Actions for Faculty
-        4. Summary Verdict.`;
+      let ageSpecificGuidelines = "";
+      if (submission.level === WellBeingLevel.LEVEL_1) {
+        ageSpecificGuidelines = `
+          FOCUS: Std 1 to 3
+          - BEHAVIOUR: Social circle (friends), school attitude, patience/impulse control.
+          - MENTAL HEALTH: Morning mindset, self-image.
+          - CONCERN: Isolation signs, home belonging.
+          - RED FLAGS: Trauma markers, total emotional shutdown.
+        `;
+      } else if (submission.level === WellBeingLevel.LEVEL_2) {
+        ageSpecificGuidelines = `
+          FOCUS: Std 4 to 6
+          - BEHAVIOUR: Academic anxiety, focus deficit, support-seeking.
+          - MENTAL HEALTH: Internal battery (burnout), life narrative (adventure vs tragedy).
+          - CONCERN: School as "prison", social paranoia, parentification.
+          - RED FLAGS: Anhedonia, dissociation, lack of future hope.
+        `;
+      } else if (submission.level === WellBeingLevel.LEVEL_3) {
+        ageSpecificGuidelines = `
+          FOCUS: Std 7 to 8
+          - BEHAVIOUR: Authenticity vs Masking, digital comparison (Social Media).
+          - MENTAL HEALTH: Body image, somatic stress (Psychomotor Retardation).
+          - CONCERN: Rejection sensitivity, parent-child bond quality.
+          - RED FLAGS: Suicidal ideation (Critical), self-harm, severe panic.
+        `;
+      } else if (submission.level === WellBeingLevel.LEVEL_4) {
+        ageSpecificGuidelines = `
+          FOCUS: Std 9 to 10
+          - BEHAVIOUR: Executive function (Planning vs Paralysis), digital dependency.
+          - MENTAL HEALTH: Academic burnout (Battery empty), Somatization (Headaches/Shakiness due to results), Self-loathing.
+          - CONCERN: Social Masking (Imposter Syndrome), Rejection sensitivity, Home as "Pressure Cooker".
+          - RED FLAGS: Intense Hopelessness (Future looks dark/blank), Emotional Blunting (Robot/Numbness), Dissociation (Floating), Learned Helplessness.
+        `;
+      }
 
+      const promptText = `
+        Act as a Senior Clinical Psychologist and EdTech Specialist for NitGyanam. 
+        Analyze the following student assessment data using our 4-Category Clinical Framework.
+
+        FRAMEWORK CATEGORIES:
+        1. BEHAVIOUR PATTERN: Interaction, executive habits, and social discipline.
+        2. MENTAL HEALTH (INTERNAL STATE): Internal mood, somatic stress, and self-esteem.
+        3. CONCLUSION CONCERN: Environmental stressors and social insecurities.
+        4. IMMEDIATE ACTION (RED FLAGS): High-risk indicators (Trauma, clinical depression, hopelessness).
+
+        AGE-SPECIFIC ANALYSIS GUIDELINES:
+        ${ageSpecificGuidelines}
+
+        STUDENT CONTEXT:
+        Name: ${submission.student.name}
+        Grade: ${submission.student.standard} (${submission.level})
+        Overall Risk Status: ${submission.riskStatus}
+        
+        RAW FINDINGS (MCQ Responses):
+        ${answerSummary}
+
+        TASK:
+        Generate a comprehensive Clinical Synthesis Report. 
+        Ensure you explicitly address the 4 categories above. 
+        Be extremely vigilant for any "RED FLAG" indicators, especially regarding Future Hopelessness (Category 4).
+        
+        REPORT STRUCTURE:
+        - CLINICAL SUMMARY: High-level overview of the student's psychological profile.
+        - CATEGORICAL BREAKDOWN: Detailed analysis of Behaviour, Mental Health, and Concerns.
+        - RISK ASSESSMENT: Specific identification of any Red Flags or clinical warnings.
+        - ACTIONABLE RECOMMENDATIONS: Clear next steps for faculty and parents.
+        - FINAL VERDICT: Professional closing statement.
+      `;
+
+      // Always use ai.models.generateContent for Gemini 3 series
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: promptText,
         config: { 
-          temperature: 0.7,
-          topP: 0.95,
-          topK: 64
+          temperature: 0.6,
+          topP: 0.9,
+          topK: 40
         }
       });
       
-      const text = response.text;
-      if (!text) {
-        throw new Error("Empty response from clinical model.");
-      }
-      return text;
+      // Use .text property to access response
+      return response.text || "Diagnostic failure - Empty report.";
     } catch (error: any) {
-      console.error("NitGyanam AI Full Error Context:", error);
-      
-      if (error?.message?.includes("API_KEY_INVALID") || error?.status === "PERMISSION_DENIED") {
-        return "CRITICAL ERROR: The configured API Key is invalid or has been disabled. Please verify your credentials in Google AI Studio.";
-      }
-      
-      return `Clinical Synthesis Error: ${error?.message || "Internal diagnostic failure"}`;
+      console.error("AI Analysis Error:", error);
+      return `Clinical Synthesis Error: ${error?.message || "Internal failure"}`;
     }
   },
 
@@ -212,8 +261,8 @@ export const api = {
     const redFlagCount = answers.filter(a => a === ResponseIndicator.RED_FLAG).length;
     const concernCount = answers.filter(a => a === ResponseIndicator.CONCERN).length;
     
-    if (redFlagCount >= 2 || (redFlagCount / total) > 0.1) return { riskStatus: 'CRITICAL' as const, conclusion: 'Immediate referral recommended.' };
-    if (concernCount > total * 0.25) return { riskStatus: 'MODERATE' as const, conclusion: 'Active monitoring required.' };
-    return { riskStatus: 'STABLE' as const, conclusion: 'Healthy baseline.' };
+    if (redFlagCount >= 1) return { riskStatus: 'CRITICAL' as const, conclusion: 'Clinical Red Flags identified. Immediate review required.' };
+    if (concernCount > total * 0.2) return { riskStatus: 'MODERATE' as const, conclusion: 'Moderate indicators found. Active monitoring suggested.' };
+    return { riskStatus: 'STABLE' as const, conclusion: 'Student appears healthy and connected.' };
   }
 };

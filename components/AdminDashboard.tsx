@@ -172,7 +172,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                         onClick={() => setSelectedSubmission(s)}
                         className="bg-wellBeingBlue text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-charcoal transition-all shadow-md"
                       >
-                        Psychological Conclusion
+                        Behavioral Record
                       </button>
                     </td>
                     <td className="px-10 py-10 text-[11px] text-slate-300 font-black uppercase tracking-tighter">
@@ -190,89 +190,110 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
         {selectedSubmission && (
           <>
             <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setSelectedSubmission(null)}
-              className="fixed inset-0 bg-charcoal/80 backdrop-blur-md z-[100]"
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setSelectedSubmission(null)} 
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[2100]" 
             />
             <motion.div 
-              initial={{ scale: 0.95, opacity: 0, y: 30 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 30 }}
-              className="fixed inset-0 m-auto w-full max-w-4xl h-fit max-h-[90vh] bg-white rounded-[4rem] z-[101] shadow-2xl overflow-hidden flex flex-col"
+              initial={{ scale: 0.95, opacity: 0, y: 30 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.95, opacity: 0, y: 30 }} 
+              className="fixed inset-4 md:inset-10 lg:inset-20 m-auto w-full max-w-5xl h-fit max-h-[90vh] bg-white rounded-[3rem] z-[2200] shadow-2xl overflow-hidden flex flex-col"
             >
-              <div className="bg-charcoal px-12 py-10 text-white flex justify-between items-center shrink-0">
+              {/* Header - Matching requested style */}
+              <div className="bg-[#0A0A0A] px-10 py-10 text-white flex justify-between items-start shrink-0">
                 <div className="flex items-center space-x-6">
-                  <div className="w-12 h-12 bg-wellBeingBlue rounded-2xl flex items-center justify-center text-2xl">📝</div>
+                  <div className="w-14 h-14 bg-wellBeingBlue rounded-2xl flex items-center justify-center text-3xl shadow-lg">📄</div>
                   <div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter">Clinical Diagnostic Record</h3>
-                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.3em] mt-1">NitGyanam Well-Being Framework</p>
+                    <h3 className="text-3xl font-black uppercase tracking-tighter leading-none">Behavioral Assessment Record</h3>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.4em] mt-3">NitGyanam Well-Being Framework</p>
                   </div>
                 </div>
                 <button 
-                  onClick={() => setSelectedSubmission(null)}
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  onClick={() => setSelectedSubmission(null)} 
+                  className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all group shadow-inner"
                 >
-                  ✕
+                  <span className="text-2xl text-white group-hover:scale-110 transition-transform">✕</span>
                 </button>
               </div>
 
-              <div className="p-12 overflow-y-auto custom-scrollbar bg-slate-50/30">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 bg-white p-10 rounded-[2.5rem] border border-slate-100">
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Full Name</p>
-                    <p className="font-bold text-slate-800">{selectedSubmission.student.name}</p>
+              {/* Scrollable Content Area */}
+              <div className="flex-grow overflow-y-auto p-12 md:p-16 custom-scrollbar bg-white">
+                <div className="max-w-4xl mx-auto space-y-12">
+                   {/* Info Matrix */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-10 border-b border-slate-100">
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Full Name</p>
+                      <p className="text-xl font-bold text-slate-800">{selectedSubmission.student.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Academic Grade</p>
+                      <p className="text-xl font-bold text-slate-800">Std {selectedSubmission.student.standard}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Diagnostic ID</p>
+                      <p className="text-xl font-bold text-wellBeingBlue">{selectedSubmission.id}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Risk Verdict</p>
+                      <div className={`text-xl font-black uppercase ${
+                        selectedSubmission.riskStatus === 'CRITICAL' ? 'text-red-500' : 
+                        selectedSubmission.riskStatus === 'MODERATE' ? 'text-amber-500' : 'text-emerald-500'
+                      }`}>
+                        {selectedSubmission.riskStatus}
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Grade</p>
-                    <p className="font-bold text-slate-800">Std {selectedSubmission.student.standard}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Diagnostic ID</p>
-                    <p className="font-bold text-wellBeingBlue">{selectedSubmission.id}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Status</p>
-                    <p className={`font-black uppercase text-[10px] ${
-                      selectedSubmission.riskStatus === 'CRITICAL' ? 'text-red-500' : 
-                      selectedSubmission.riskStatus === 'MODERATE' ? 'text-amber-500' : 'text-emerald-500'
-                    }`}>{selectedSubmission.riskStatus}</p>
-                  </div>
-                </div>
 
-                <div className="prose prose-slate prose-lg max-w-none">
-                  <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed text-lg border-l-4 border-wellBeingBlue/20 pl-8 py-2">
-                    {selectedSubmission.aiReport ? selectedSubmission.aiReport : "Analysis pending or unavailable."}
+                  {/* Student Feedback */}
+                  {selectedSubmission.feedback && (
+                    <div className="bg-amber-50/50 border border-amber-100 p-8 rounded-[2.5rem]">
+                        <h4 className="text-[10px] font-black uppercase text-amber-600 tracking-widest mb-4">Student Self-Disclosure</h4>
+                        <p className="font-medium text-slate-700 italic text-xl leading-relaxed">"{selectedSubmission.feedback}"</p>
+                    </div>
+                  )}
+
+                  {/* Main Analysis Text */}
+                  <div className="prose prose-slate prose-xl max-w-none">
+                    <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed border-l-4 border-slate-100 pl-10 py-4">
+                      {selectedSubmission.aiReport ? selectedSubmission.aiReport : "Analyzing behavioral markers..."}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="px-12 py-8 bg-white border-t border-slate-100 flex justify-between items-center shrink-0">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                  Confidential Document • Authorized Reviewer: {user.username}
-                </p>
-                <div className="flex gap-4">
+              {/* Footer Actions - Matching requested style */}
+              <div className="px-10 py-8 bg-white border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6 shrink-0">
+                <div className="flex flex-col">
+                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">Confidential Diagnostic Document</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Authorized Reviewer: <span className="text-wellBeingBlue">{user.username}</span></p>
+                </div>
+                
+                <div className="flex flex-wrap justify-center gap-4">
                   <button 
-                    disabled={isRegenerating}
-                    onClick={handleRegenerate}
-                    className={`flex items-center space-x-3 px-6 py-3 border-2 border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all ${
-                      isRegenerating ? 'opacity-50' : 'hover:border-wellBeingBlue hover:text-wellBeingBlue'
+                    disabled={isRegenerating} 
+                    onClick={handleRegenerate} 
+                    className={`flex items-center space-x-3 px-8 py-4 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 shadow-sm transition-all ${
+                      isRegenerating ? 'opacity-50' : 'hover:border-wellBeingBlue hover:text-wellBeingBlue hover:bg-wellBeingBlue/5'
                     }`}
                   >
                     {isRegenerating ? (
                       <div className="w-4 h-4 border-2 border-wellBeingBlue border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <span>🔄 Regenerate Analysis</span>
+                      <span className="flex items-center"><span className="mr-2">🔄</span> Regenerate Analysis</span>
                     )}
                   </button>
                   <button 
-                    onClick={() => window.print()}
-                    className="px-6 py-3 border-2 border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all"
+                    onClick={() => window.print()} 
+                    className="px-8 py-4 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
                   >
                     Print Record
                   </button>
                   <button 
-                    onClick={() => setSelectedSubmission(null)}
-                    className="bg-charcoal text-white px-10 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-wellBeingBlue transition-all shadow-lg"
+                    onClick={() => setSelectedSubmission(null)} 
+                    className="bg-[#0A0A0A] text-white px-12 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95"
                   >
                     Close
                   </button>
