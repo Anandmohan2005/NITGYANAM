@@ -4,8 +4,9 @@ import { motion } from 'framer-motion';
 import { BRANDING } from '../constants';
 
 const Footer: React.FC = () => {
-  // Founder Photo - Actual image of Anand Mohan
-  const anandPhotoUrl = 'https://media.licdn.com/dms/image/v2/D5603AQExU4z0pWj3vA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1709404285709?e=1746057600&v=beta&t=v_fC_M39lR7k8j-y7X7-vH8g1YfVzY8V8-v_v_v_v_v';
+  // Founder Photo - Updated to local reference
+  const founderPhotoUrl = '/founder.jpg';
+  const fallbackUrl = 'https://ui-avatars.com/api/?name=Anand+Mohan&background=FFD700&color=0A0A0A&bold=true';
 
   return (
     <footer className="bg-charcoal text-white py-20 border-t border-white/5 relative overflow-hidden">
@@ -49,11 +50,11 @@ const Footer: React.FC = () => {
               <div className="relative">
                 <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-gold/30 rotate-3 group-hover:rotate-0 transition-transform duration-500 shadow-xl bg-white">
                   <img 
-                    src={anandPhotoUrl} 
+                    src={founderPhotoUrl} 
                     alt="Anand Mohan" 
                     className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Anand+Mohan&background=FFD700&color=0A0A0A&bold=true';
+                      (e.target as HTMLImageElement).src = fallbackUrl;
                     }}
                   />
                 </div>
