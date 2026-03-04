@@ -19,7 +19,7 @@ const FounderSection: React.FC = () => {
             <div className="space-y-2">
               <span className="text-wellBeingBlue text-[10px] font-black uppercase tracking-[0.5em] block">Visionary Leadership</span>
               <h3 className="text-5xl md:text-6xl font-black text-charcoal tracking-tighter uppercase leading-none">
-                Meet the <span className="text-gold">Founder</span>
+                Meet the <span className="text-gold">Founders</span>
               </h3>
             </div>
             
@@ -27,11 +27,22 @@ const FounderSection: React.FC = () => {
               "At Student, we believe that true education extends beyond classrooms. It begins with a healthy mind and a supportive ecosystem. Our mission is to bridge the gap between academic pressure and emotional resilience."
             </p>
 
-            <div className="pt-8 flex items-center">
-              {/* Black Box Removed */}
+            <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
-                <p className="text-charcoal font-black text-2xl uppercase tracking-tighter leading-none">Anand Mohan</p>
+                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Anand&nbsp;&nbsp;&nbsp;Mohan</p>
                 <p className="text-gold text-[9px] font-black uppercase tracking-[0.4em] mt-1">Founder & Project Director</p>
+              </div>
+              <div>
+                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Aditya&nbsp;&nbsp;&nbsp;Kumar</p>
+                <p className="text-gold text-[9px] font-black uppercase tracking-[0.4em] mt-1">Co-Founder</p>
+              </div>
+              <div>
+                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Raushan&nbsp;&nbsp;&nbsp;Kumar</p>
+                <p className="text-gold text-[9px] font-black uppercase tracking-[0.4em] mt-1">Co-Founder</p>
+              </div>
+              <div>
+                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Ankit&nbsp;&nbsp;&nbsp;Raj</p>
+                <p className="text-gold text-[9px] font-black uppercase tracking-[0.4em] mt-1">Co-Founder</p>
               </div>
             </div>
           </motion.div>
