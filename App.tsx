@@ -1,6 +1,6 @@
 
 /**
- * NITGYANAM WELL-BEING PORTAL - TECHNICAL ARCHITECTURE
+ * STUDENT WELL-BEING PORTAL - TECHNICAL ARCHITECTURE
  * ---------------------------------------------------
  * Framework: React 19 (Functional Components + Hooks)
  * Styling: Tailwind CSS (Utility-first, JIT Engine)
@@ -198,7 +198,7 @@ const App: React.FC = () => {
                 <p className="text-wellBeingBlue mb-4 font-bold uppercase tracking-widest text-[9px]">Local Data Store</p>
                 <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                   <pre className="text-[8px] leading-tight text-gold/80">
-                    {JSON.stringify(JSON.parse(localStorage.getItem('nit_gyanam_submissions_v2') || '[]'), null, 2)}
+                    {JSON.stringify(JSON.parse(localStorage.getItem('student_submissions_v2') || '[]'), null, 2)}
                   </pre>
                 </div>
               </div>

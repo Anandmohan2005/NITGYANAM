@@ -1,5 +1,5 @@
 
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { WellBeingLevel, Question, ResponseIndicator, StudentInfo, Submission, Option } from '../types';
 import { api } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -77,7 +77,7 @@ const Quiz: React.FC<QuizProps> = ({ onComplete }) => {
       // INSTANT COMPLETION LOGIC
       if (document.fullscreenElement) document.exitFullscreen();
       
-      const answerList = Object.values(newAnswers).map(a => a.indicator);
+      const answerList = (Object.values(newAnswers) as { indicator: ResponseIndicator; optionId: string }[]).map(a => a.indicator);
       const { riskStatus, conclusion } = api.analyzeResults(answerList);
       
       const submission: Submission = {
@@ -329,7 +329,7 @@ const Quiz: React.FC<QuizProps> = ({ onComplete }) => {
         </div>
 
         <div className="text-center py-20 border-t border-slate-100">
-           <h3 className="text-6xl font-signature text-gold mb-6">NitGyanam</h3>
+           <h3 className="text-6xl font-signature text-wellBeingBlue mb-6">Student</h3>
            <p className="text-slate-400 text-lg max-w-lg mx-auto leading-relaxed italic font-medium">Empowering future generations through proactive care.</p>
         </div>
       </motion.div>

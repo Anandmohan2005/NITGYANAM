@@ -78,7 +78,7 @@ const Footer: React.FC = () => {
               © {new Date().getFullYear()} {BRANDING.name}
             </p>
             <p className="text-gray-600 text-[9px] font-bold uppercase tracking-widest">
-              Digital Infrastructure by NITG Clinical Lab
+              Digital Infrastructure by STUDENT Clinical Lab
             </p>
           </div>
           <div className="flex items-center space-x-6">

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Question, WellBeingLevel, ResponseIndicator, Option } from '../types';
 import { api } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';

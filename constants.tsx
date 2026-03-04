@@ -900,7 +900,7 @@ export const QUIZ_DATA: Question[] = [
 ];
 
 export const BRANDING = {
-  name: "NitGyanam Consultancy Pvt. Ltd.",
+  name: "Student Consultancy Pvt. Ltd.",
   tagline: "Empowering through knowledge & practical exposure",
   affiliation: "Incubated at NIT Patna",
   recognition: "Recognized by DPIIT & Startup Bihar",

@@ -4,8 +4,8 @@ import { QUIZ_DATA } from '../constants';
 import { GoogleGenAI } from "@google/genai";
 import { supabase } from './supabase';
 
-const QUESTIONS_KEY = 'nit_gyanam_questions_v2';
-const SUBMISSIONS_KEY = 'nit_gyanam_submissions_v2';
+const QUESTIONS_KEY = 'student_questions_v2';
+const SUBMISSIONS_KEY = 'student_submissions_v2';
 
 export const api = {
   fetchQuestions: async (): Promise<Question[]> => {
@@ -204,7 +204,7 @@ export const api = {
       }
 
       const promptText = `
-        Act as a Senior Clinical Psychologist and EdTech Specialist for NitGyanam. 
+        Act as a Senior Clinical Psychologist and EdTech Specialist for Student. 
         Analyze the following student assessment data using our 4-Category Clinical Framework.
 
         FRAMEWORK CATEGORIES:
@@ -244,7 +244,7 @@ export const api = {
       console.error("AI Analysis Error:", error);
       // Friendly message for quota errors
       if (error?.message?.includes('429') || error?.message?.includes('quota')) {
-        return "NitGyanam System Alert: Clinical server is currently at peak capacity. Please wait 60 seconds and click 'Regenerate Analysis' to refresh this record.";
+        return "Student System Alert: Clinical server is currently at peak capacity. Please wait 60 seconds and click 'Regenerate Analysis' to refresh this record.";
       }
       return `Clinical Synthesis Error: ${error?.message || "Internal failure"}`;
     }

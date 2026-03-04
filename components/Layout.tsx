@@ -124,7 +124,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeView, user,
               >
                 {/* Header Section - Solid White */}
                 <div className="p-10 border-b border-slate-200 bg-white">
-                  <Logo hideText className="w-9 h-9" />
+                  <Logo className="w-9 h-9" />
                   <p className="mt-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Portal Navigator</p>
                 </div>
 
@@ -190,7 +190,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigate, activeView, user,
 
                 {/* Footer Section - Solid White */}
                 <div className="mt-auto p-10 border-t border-slate-200 bg-white">
-                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.5em] text-center">NitGyanam Well-Being v2.6</p>
+                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.5em] text-center">Student Well-Being v2.6</p>
                 </div>
               </motion.div>
             </>

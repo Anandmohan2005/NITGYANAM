@@ -27,7 +27,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-20">
       <div className="max-w-md w-full glass-card p-12 shadow-soft-xl border-white">
         <div className="flex justify-center mb-10">
-          <Logo className="w-20 h-20" hideText />
+          <Logo className="w-20 h-20" />
         </div>
         <h2 className="text-3xl font-black text-center text-charcoal mb-2 uppercase tracking-tighter">Gateway Access</h2>
         <p className="text-gray-400 text-center text-[10px] font-black uppercase tracking-[0.3em] mb-12">Faculty & Administration Port</p>

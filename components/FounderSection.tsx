@@ -24,7 +24,7 @@ const FounderSection: React.FC = () => {
             </div>
             
             <p className="text-slate-500 text-xl leading-relaxed font-medium italic">
-              "At NitGyanam, we believe that true education extends beyond classrooms. It begins with a healthy mind and a supportive ecosystem. Our mission is to bridge the gap between academic pressure and emotional resilience."
+              "At Student, we believe that true education extends beyond classrooms. It begins with a healthy mind and a supportive ecosystem. Our mission is to bridge the gap between academic pressure and emotional resilience."
             </p>
 
             <div className="pt-8 flex items-center">

@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 /**
- * NitGyanam Supabase Connector
+ * Student Supabase Connector
  * This helper ensures we pick up keys regardless of the deployment environment.
  */
 const getVar = (key: string): string => {
@@ -19,12 +19,12 @@ const supabaseUrl = getVar('SUPABASE_URL');
 const supabaseKey = getVar('SUPABASE_ANON_KEY');
 
 // Detailed Diagnostics
-console.group("NitGyanam Cloud Status");
+console.group("Student Cloud Status");
 console.log("Check 1: URL ->", supabaseUrl ? "Found ✅" : "MISSING ❌");
 console.log("Check 2: Key ->", supabaseKey ? "Found ✅" : "MISSING ❌");
 
 if (!supabaseUrl || !supabaseKey) {
-  console.warn("NitGyanam: Cloud variables not detected. LocalStorage fallback active.");
+  console.warn("Student: Cloud variables not detected. LocalStorage fallback active.");
   console.info("To Fix: Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your hosting dashboard.");
 }
 console.groupEnd();
@@ -36,7 +36,7 @@ const createSafeClient = () => {
     new URL(supabaseUrl);
     return createClient(supabaseUrl, supabaseKey);
   } catch (e) {
-    console.error("NitGyanam: Invalid Supabase URL format provided.");
+    console.error("Student: Invalid Supabase URL format provided.");
     return null;
   }
 };
