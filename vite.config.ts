@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     
     // Mapping keys to process.env for the build
     const config = {
-      apiKey: env.VITE_GEMINI_API_KEY || env.API_KEY || "",
+      apiKey: env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY || env.API_KEY || "",
       supabaseUrl: env.VITE_SUPABASE_URL || env.SUPABASE_URL || "",
       supabaseKey: env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || ""
     };
@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
+        'process.env.GEMINI_API_KEY': JSON.stringify(config.apiKey),
         'process.env.API_KEY': JSON.stringify(config.apiKey),
         'process.env.SUPABASE_URL': JSON.stringify(config.supabaseUrl),
         'process.env.SUPABASE_ANON_KEY': JSON.stringify(config.supabaseKey),

@@ -47,7 +47,7 @@ const Footer: React.FC = () => {
                   <span className="font-black text-xs">AM</span>
                 </div>
                 <div>
-                  <p className="text-sm font-black uppercase text-white leading-none tracking-widest">Anand&nbsp;&nbsp;&nbsp;Mohan</p>
+                  <p className="text-sm font-black uppercase text-white leading-none tracking-widest">Anand&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mohan</p>
                   <p className="text-gold text-[8px] font-black uppercase tracking-[0.2em] mt-1">Founder & Director</p>
                 </div>
               </div>
@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
                   <span className="font-black text-xs">AK</span>
                 </div>
                 <div>
-                  <p className="text-sm font-black uppercase text-white leading-none tracking-widest">Aditya&nbsp;&nbsp;&nbsp;Kumar</p>
+                  <p className="text-sm font-black uppercase text-white leading-none tracking-widest">Aditya&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kumar</p>
                   <p className="text-gray-500 text-[8px] font-black uppercase tracking-[0.2em] mt-1">Co-Founder</p>
                 </div>
               </div>
@@ -65,7 +65,7 @@ const Footer: React.FC = () => {
                   <span className="font-black text-xs">RK</span>
                 </div>
                 <div>
-                  <p className="text-sm font-black uppercase text-white leading-none tracking-widest">Raushan&nbsp;&nbsp;&nbsp;Kumar</p>
+                  <p className="text-sm font-black uppercase text-white leading-none tracking-widest">Raushan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kumar</p>
                   <p className="text-gray-500 text-[8px] font-black uppercase tracking-[0.2em] mt-1">Co-Founder</p>
                 </div>
               </div>
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
                   <span className="font-black text-xs">AR</span>
                 </div>
                 <div>
-                  <p className="text-sm font-black uppercase text-white leading-none tracking-widest">Ankit&nbsp;&nbsp;&nbsp;Raj</p>
+                  <p className="text-sm font-black uppercase text-white leading-none tracking-widest">Ankit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Raj</p>
                   <p className="text-gray-500 text-[8px] font-black uppercase tracking-[0.2em] mt-1">Co-Founder</p>
                 </div>
               </div>

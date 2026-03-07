@@ -155,12 +155,12 @@ export const api = {
   },
 
   generateAIAnalysis: async (submission: Submission, questions: Question[]): Promise<string> => {
-    if (!process.env.API_KEY) {
-      return "CRITICAL: API_KEY is missing from environment variables.";
+    if (!process.env.GEMINI_API_KEY) {
+      return "CRITICAL: GEMINI_API_KEY is missing from environment variables.";
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const answerEntries = Object.entries(submission.answers || {});
       const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
         const q = questions.find(q => q.id === qid);
@@ -242,6 +242,12 @@ export const api = {
       return response.text || "Diagnostic failure - Empty report.";
     } catch (error: any) {
       console.error("AI Analysis Error:", error);
+      
+      // Specific handling for leaked API key
+      if (error?.message?.includes("leaked") || error?.status === "PERMISSION_DENIED") {
+        return "Clinical Synthesis Error: Your API key was reported as leaked or is invalid. Please ensure you are using a valid API key from Google AI Studio and that it hasn't been exposed publicly.";
+      }
+
       // Friendly message for quota errors
       if (error?.message?.includes('429') || error?.message?.includes('quota')) {
         return "Student System Alert: Clinical server is currently at peak capacity. Please wait 60 seconds and click 'Regenerate Analysis' to refresh this record.";

@@ -209,7 +209,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                   </div>
                   <div>
                     <h3 className="text-3xl font-black uppercase tracking-tighter leading-none">Behavioral Record</h3>
-                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.4em] mt-3">Verified by: Anand Mohan</p>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.4em] mt-3">Verified by: Anand&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mohan</p>
                   </div>
                 </div>
                 <button 

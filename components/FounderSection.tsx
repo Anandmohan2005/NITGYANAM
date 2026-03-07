@@ -29,19 +29,19 @@ const FounderSection: React.FC = () => {
 
             <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
-                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Anand&nbsp;&nbsp;&nbsp;Mohan</p>
+                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Anand&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mohan</p>
                 <p className="text-gold text-[9px] font-black uppercase tracking-[0.4em] mt-1">Founder & Project Director</p>
               </div>
               <div>
-                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Aditya&nbsp;&nbsp;&nbsp;Kumar</p>
+                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Aditya&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kumar</p>
                 <p className="text-gold text-[9px] font-black uppercase tracking-[0.4em] mt-1">Co-Founder</p>
               </div>
               <div>
-                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Raushan&nbsp;&nbsp;&nbsp;Kumar</p>
+                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Raushan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kumar</p>
                 <p className="text-gold text-[9px] font-black uppercase tracking-[0.4em] mt-1">Co-Founder</p>
               </div>
               <div>
-                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Ankit&nbsp;&nbsp;&nbsp;Raj</p>
+                <p className="text-charcoal font-black text-2xl uppercase leading-none tracking-widest">Ankit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Raj</p>
                 <p className="text-gold text-[9px] font-black uppercase tracking-[0.4em] mt-1">Co-Founder</p>
               </div>
             </div>
