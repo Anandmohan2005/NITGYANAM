@@ -155,6 +155,7 @@ export const api = {
   },
 
   generateAIAnalysis: async (submission: Submission, questions: Question[]): Promise<string> => {
+    console.log("Starting AI Analysis. Key present:", !!process.env.GEMINI_API_KEY);
     if (!process.env.GEMINI_API_KEY) {
       return "CRITICAL: GEMINI_API_KEY is missing from environment variables.";
     }
