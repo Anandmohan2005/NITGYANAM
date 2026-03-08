@@ -163,122 +163,125 @@ export const api = {
     const maxRetries = 3;
     let attempt = 0;
 
+    const answerEntries = Object.entries(submission.answers || {});
+    const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
+      const q = questions.find(q => q.id === qid);
+      const opt = q?.options.find(o => o.id === ans.optionId);
+      return `[Indicator: ${ans.indicator}] Q: ${q?.textEn} -> Answer: "${opt?.en}"`;
+    }).join('\n');
+
+    let ageSpecificGuidelines = "";
+    if (submission.level === WellBeingLevel.LEVEL_1) {
+      ageSpecificGuidelines = `
+        FOCUS: Std 1 to 3
+        - BEHAVIOUR: Social circle (friends), school attitude, patience/impulse control.
+        - MENTAL HEALTH: Morning mindset, self-image.
+        - CONCERN: Isolation signs, home belonging.
+        - RED FLAGS: Trauma markers, total emotional shutdown.
+      `;
+    } else if (submission.level === WellBeingLevel.LEVEL_2) {
+      ageSpecificGuidelines = `
+        FOCUS: Std 4 to 6
+        - BEHAVIOUR: Academic anxiety, focus deficit, support-seeking.
+        - MENTAL HEALTH: Internal battery (burnout), life narrative (adventure vs tragedy).
+        - CONCERN: School as "prison", social paranoia, parentification.
+        - RED FLAGS: Anhedonia, dissociation, lack of future hope.
+      `;
+    } else if (submission.level === WellBeingLevel.LEVEL_3) {
+      ageSpecificGuidelines = `
+        FOCUS: Std 7 to 8
+        - BEHAVIOUR: Authenticity vs Masking, digital comparison (Social Media).
+        - MENTAL HEALTH: Body image, somatic stress (Psychomotor Retardation).
+        - CONCERN: Rejection sensitivity, parent-child bond quality.
+        - RED FLAGS: Suicidal ideation (Critical), self-harm, severe panic.
+      `;
+    } else if (submission.level === WellBeingLevel.LEVEL_4) {
+      ageSpecificGuidelines = `
+        FOCUS: Std 9 to 10
+        - BEHAVIOUR: Executive function (Planning vs Paralysis), digital dependency.
+        - MENTAL HEALTH: Academic burnout (Battery empty), Somatization (Headaches/Shakiness due to results), Self-loathing.
+        - CONCERN: Social Masking (Imposter Syndrome), Rejection sensitivity, Home as "Pressure Cooker".
+        - RED FLAGS: Intense Hopelessness (Future looks dark/blank), Emotional Blunting (Robot/Numbness), Dissociation (Floating), Learned Helplessness.
+      `;
+    }
+
+    const promptText = `
+      Act as a Senior Clinical Psychologist and EdTech Specialist for Student. 
+      Analyze the following student assessment data using our 4-Category Clinical Framework.
+
+      FRAMEWORK CATEGORIES:
+      1. BEHAVIOUR PATTERN: Interaction, executive habits, and social discipline.
+      2. MENTAL HEALTH (INTERNAL STATE): Internal mood, somatic stress, and self-esteem.
+      3. CONCLUSION CONCERN: Environmental stressors and social insecurities.
+      4. IMMEDIATE ACTION (RED FLAGS): High-risk indicators (Trauma, clinical depression, hopelessness).
+
+      AGE-SPECIFIC ANALYSIS GUIDELINES:
+      ${ageSpecificGuidelines}
+
+      STUDENT CONTEXT:
+      Name: ${submission.student.name}
+      Grade: ${submission.student.standard} (${submission.level})
+      Overall Risk Status: ${submission.riskStatus}
+      
+      RAW FINDINGS (MCQ Responses):
+      ${answerSummary}
+
+      TASK:
+      Generate a comprehensive Clinical Synthesis Report. 
+      
+      MANDATORY FORMATTING:
+      You MUST follow this exact Markdown structure:
+      
+      **Student Well being Portal: Student Assessment Report**
+      
+      **Student:** ${submission.student.name} (ID: ${submission.id.slice(0, 8)})
+      **Status:** **${submission.riskStatus}**
+      **Date of Assessment:** ${new Date(submission.timestamp).toLocaleDateString()}
+      
+      ---
+      
+      This assessment for ${submission.student.name} (${submission.student.standard}) indicates [Summary of emotional state].
+      
+      ### **1. Overview**
+      [Provide a high-level summary of the student's emotional profile, burnout levels, and core themes from their responses.]
+      
+      ### **2. Risk Analysis**
+      *   **Psychological Risk ([STATUS]):** [Analysis of internal mood, anxiety, and depression markers]
+      *   **Physical/Functional Risk ([STATUS]):** [Analysis of sleep, energy levels, and somatic symptoms]
+      *   **Social Risk ([STATUS]):** [Analysis of peer interactions, isolation, and self-worth]
+      *   **Academic Risk ([STATUS]):** [Analysis of school attitude, homework pressure, and teacher relationship]
+      
+      ### **3. Guidance & Recommendations**
+      **Immediate Actions (Within 24 Hours):**
+      *   [Emergency check-in, safety assessment, or parental notification if critical]
+      
+      **Short-Term Support:**
+      *   [Academic reprieve, safe space creation, or professional referral]
+      
+      ### **4. Verdict: [URGENCY LEVEL]**
+      **Status: [FINAL VERDICT STATUS]**
+      [Final concluding statement about the student's resilience and the probability of crisis if not addressed.]
+      
+      Ensure Category 4 (RED FLAGS) is addressed with extreme vigilance.
+    `;
+
     const executeAnalysis = async (): Promise<string> => {
       try {
+        console.log("Executing AI Analysis with prompt length:", promptText.length);
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const answerEntries = Object.entries(submission.answers || {});
-        const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
-          const q = questions.find(q => q.id === qid);
-          const opt = q?.options.find(o => o.id === ans.optionId);
-          return `[Indicator: ${ans.indicator}] Q: ${q?.textEn} -> Answer: "${opt?.en}"`;
-        }).join('\n');
-
-        let ageSpecificGuidelines = "";
-        if (submission.level === WellBeingLevel.LEVEL_1) {
-          ageSpecificGuidelines = `
-            FOCUS: Std 1 to 3
-            - BEHAVIOUR: Social circle (friends), school attitude, patience/impulse control.
-            - MENTAL HEALTH: Morning mindset, self-image.
-            - CONCERN: Isolation signs, home belonging.
-            - RED FLAGS: Trauma markers, total emotional shutdown.
-          `;
-        } else if (submission.level === WellBeingLevel.LEVEL_2) {
-          ageSpecificGuidelines = `
-            FOCUS: Std 4 to 6
-            - BEHAVIOUR: Academic anxiety, focus deficit, support-seeking.
-            - MENTAL HEALTH: Internal battery (burnout), life narrative (adventure vs tragedy).
-            - CONCERN: School as "prison", social paranoia, parentification.
-            - RED FLAGS: Anhedonia, dissociation, lack of future hope.
-          `;
-        } else if (submission.level === WellBeingLevel.LEVEL_3) {
-          ageSpecificGuidelines = `
-            FOCUS: Std 7 to 8
-            - BEHAVIOUR: Authenticity vs Masking, digital comparison (Social Media).
-            - MENTAL HEALTH: Body image, somatic stress (Psychomotor Retardation).
-            - CONCERN: Rejection sensitivity, parent-child bond quality.
-            - RED FLAGS: Suicidal ideation (Critical), self-harm, severe panic.
-          `;
-        } else if (submission.level === WellBeingLevel.LEVEL_4) {
-          ageSpecificGuidelines = `
-            FOCUS: Std 9 to 10
-            - BEHAVIOUR: Executive function (Planning vs Paralysis), digital dependency.
-            - MENTAL HEALTH: Academic burnout (Battery empty), Somatization (Headaches/Shakiness due to results), Self-loathing.
-            - CONCERN: Social Masking (Imposter Syndrome), Rejection sensitivity, Home as "Pressure Cooker".
-            - RED FLAGS: Intense Hopelessness (Future looks dark/blank), Emotional Blunting (Robot/Numbness), Dissociation (Floating), Learned Helplessness.
-          `;
-        }
-
-        const promptText = `
-          Act as a Senior Clinical Psychologist and EdTech Specialist for Student. 
-          Analyze the following student assessment data using our 4-Category Clinical Framework.
-
-          FRAMEWORK CATEGORIES:
-          1. BEHAVIOUR PATTERN: Interaction, executive habits, and social discipline.
-          2. MENTAL HEALTH (INTERNAL STATE): Internal mood, somatic stress, and self-esteem.
-          3. CONCLUSION CONCERN: Environmental stressors and social insecurities.
-          4. IMMEDIATE ACTION (RED FLAGS): High-risk indicators (Trauma, clinical depression, hopelessness).
-
-          AGE-SPECIFIC ANALYSIS GUIDELINES:
-          ${ageSpecificGuidelines}
-
-          STUDENT CONTEXT:
-          Name: ${submission.student.name}
-          Grade: ${submission.student.standard} (${submission.level})
-          Overall Risk Status: ${submission.riskStatus}
-          
-          RAW FINDINGS (MCQ Responses):
-          ${answerSummary}
-
-          TASK:
-          Generate a comprehensive Clinical Synthesis Report. 
-          
-          MANDATORY FORMATTING:
-          You MUST follow this exact Markdown structure:
-          
-          **Student Well being Portal: Student Assessment Report**
-          
-          **Student:** ${submission.student.name} (ID: ${submission.id.slice(0, 8)})
-          **Status:** **${submission.riskStatus}**
-          **Date of Assessment:** ${new Date(submission.timestamp).toLocaleDateString()}
-          
-          ---
-          
-          This assessment for ${submission.student.name} (${submission.student.standard}) indicates [Summary of emotional state].
-          
-          ### **1. Overview**
-          [Provide a high-level summary of the student's emotional profile, burnout levels, and core themes from their responses.]
-          
-          ### **2. Risk Analysis**
-          *   **Psychological Risk ([STATUS]):** [Analysis of internal mood, anxiety, and depression markers]
-          *   **Physical/Functional Risk ([STATUS]):** [Analysis of sleep, energy levels, and somatic symptoms]
-          *   **Social Risk ([STATUS]):** [Analysis of peer interactions, isolation, and self-worth]
-          *   **Academic Risk ([STATUS]):** [Analysis of school attitude, homework pressure, and teacher relationship]
-          
-          ### **3. Guidance & Recommendations**
-          **Immediate Actions (Within 24 Hours):**
-          *   [Emergency check-in, safety assessment, or parental notification if critical]
-          
-          **Short-Term Support:**
-          *   [Academic reprieve, safe space creation, or professional referral]
-          
-          ### **4. Verdict: [URGENCY LEVEL]**
-          **Status: [FINAL VERDICT STATUS]**
-          [Final concluding statement about the student's resilience and the probability of crisis if not addressed.]
-          
-          Ensure Category 4 (RED FLAGS) is addressed with extreme vigilance.
-        `;
-
+        
         const response = await ai.models.generateContent({
           model: 'gemini-3-flash-preview',
-          contents: promptText,
+          contents: [{ role: 'user', parts: [{ text: promptText }] }],
           config: { 
             temperature: 0.7,
             topP: 0.8,
             topK: 40,
-            maxOutputTokens: 1024
+            maxOutputTokens: 2048
           }
         });
         
+        console.log("AI Response received successfully");
         return response.text || "Diagnostic failure - Empty report.";
       } catch (error: any) {
         console.error(`AI Analysis Attempt ${attempt + 1} Error:`, error);
