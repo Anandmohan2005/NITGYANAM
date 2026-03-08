@@ -235,7 +235,7 @@ export const api = {
           MANDATORY FORMATTING:
           You MUST follow this exact Markdown structure:
           
-          **NitGyanam Portal: Student Assessment Report**
+          **Student Well being Portal: Student Assessment Report**
           
           **Student:** ${submission.student.name} (ID: ${submission.id.slice(0, 8)})
           **Status:** **${submission.riskStatus}**
@@ -243,34 +243,27 @@ export const api = {
           
           ---
           
+          This assessment for ${submission.student.name} (${submission.student.standard}) indicates [Summary of emotional state].
+          
           ### **1. Overview**
-          [Provide a high-level summary of the student's emotional profile based on their responses.]
+          [Provide a high-level summary of the student's emotional profile, burnout levels, and core themes from their responses.]
           
           ### **2. Risk Analysis**
-          *   **Environmental Risk (Home): [STATUS]**
-              [Analysis based on home-related answers]
-          *   **Social & Peer Risk: [STATUS]**
-              [Analysis based on playground/friend-related answers]
-          *   **School-Based Anxiety & Authority Avoidance: [STATUS]**
-              [Analysis based on teacher/classroom-related answers]
-          *   **Emotional Regulation Risk: [STATUS]**
-              [Analysis based on mood/frustration-related answers]
-          *   **Sleep/Well-being Risk: [STATUS]**
-              [Analysis based on morning/night-related answers]
+          *   **Psychological Risk ([STATUS]):** [Analysis of internal mood, anxiety, and depression markers]
+          *   **Physical/Functional Risk ([STATUS]):** [Analysis of sleep, energy levels, and somatic symptoms]
+          *   **Social Risk ([STATUS]):** [Analysis of peer interactions, isolation, and self-worth]
+          *   **Academic Risk ([STATUS]):** [Analysis of school attitude, homework pressure, and teacher relationship]
           
-          ### **3. Guidance & Intervention Plan**
-          **For the School Counselor/Administrator:**
-          *   [Specific action items]
+          ### **3. Guidance & Recommendations**
+          **Immediate Actions (Within 24 Hours):**
+          *   [Emergency check-in, safety assessment, or parental notification if critical]
           
-          **For the Teacher:**
-          *   [Specific action items]
+          **Short-Term Support:**
+          *   [Academic reprieve, safe space creation, or professional referral]
           
-          **For the Parents/Guardians:**
-          *   [Specific action items]
-          
-          ### **4. Verdict**
+          ### **4. Verdict: [URGENCY LEVEL]**
           **Status: [FINAL VERDICT STATUS]**
-          [Final concluding statement and urgency level]
+          [Final concluding statement about the student's resilience and the probability of crisis if not addressed.]
           
           Ensure Category 4 (RED FLAGS) is addressed with extreme vigilance.
         `;
@@ -301,9 +294,13 @@ export const api = {
           return executeAnalysis();
         }
 
-        // Specific handling for leaked API key
-        if (error?.message?.includes("leaked") || error?.status === "PERMISSION_DENIED") {
-          return "Clinical Synthesis Error: Your API key was reported as leaked or is invalid. Please ensure you are using a valid API key from Google AI Studio and that it hasn't been exposed publicly.";
+        // Specific handling for leaked or expired API key
+        const isInvalidKey = error?.message?.includes("leaked") || 
+                            error?.message?.includes("expired") || 
+                            error?.status === "PERMISSION_DENIED";
+
+        if (isInvalidKey) {
+          return "Clinical Synthesis Error: Your API key has expired or was reported as leaked. Please go to Google AI Studio, generate a NEW API key, and update your .env.local file.";
         }
 
         // Friendly message for quota errors
