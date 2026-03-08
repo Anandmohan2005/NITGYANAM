@@ -160,7 +160,7 @@ export const api = {
       return "CRITICAL: GEMINI_API_KEY is missing from environment variables.";
     }
 
-    const maxRetries = 2;
+    const maxRetries = 3;
     let attempt = 0;
 
     const executeAnalysis = async (): Promise<string> => {
@@ -249,11 +249,13 @@ export const api = {
         console.error(`AI Analysis Attempt ${attempt + 1} Error:`, error);
         
         const isUnavailable = error?.message?.includes('503') || error?.message?.includes('UNAVAILABLE');
+        const isRateLimited = error?.message?.includes('429') || error?.message?.includes('quota');
 
-        if (isUnavailable && attempt < maxRetries) {
+        if ((isUnavailable || isRateLimited) && attempt < maxRetries) {
           attempt++;
-          // Wait 3 seconds before retrying
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          // Wait longer for rate limits (10 seconds) vs unavailable (5 seconds)
+          const delay = isRateLimited ? 10000 : 5000;
+          await new Promise(resolve => setTimeout(resolve, delay));
           return executeAnalysis();
         }
 
@@ -263,8 +265,8 @@ export const api = {
         }
 
         // Friendly message for quota errors
-        if (error?.message?.includes('429') || error?.message?.includes('quota')) {
-          return "Student System Alert: Clinical server is currently at peak capacity. Please wait 60 seconds and click 'Regenerate Analysis' to refresh this record.";
+        if (isRateLimited) {
+          return "Student System Alert: Clinical server is currently at peak capacity (Rate Limit). Please wait 60 seconds and click 'Regenerate Analysis' to refresh this record.";
         }
 
         // Handling for 503 UNAVAILABLE errors (High Demand)
