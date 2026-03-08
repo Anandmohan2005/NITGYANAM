@@ -230,7 +230,49 @@ export const api = {
           ${answerSummary}
 
           TASK:
-          Generate a comprehensive Clinical Synthesis Report. Ensure Category 4 (RED FLAGS) is addressed with extreme vigilance.
+          Generate a comprehensive Clinical Synthesis Report. 
+          
+          MANDATORY FORMATTING:
+          You MUST follow this exact Markdown structure:
+          
+          **NitGyanam Portal: Student Assessment Report**
+          
+          **Student:** ${submission.student.name} (ID: ${submission.id.slice(0, 8)})
+          **Status:** **${submission.riskStatus}**
+          **Date of Assessment:** ${new Date(submission.timestamp).toLocaleDateString()}
+          
+          ---
+          
+          ### **1. Overview**
+          [Provide a high-level summary of the student's emotional profile based on their responses.]
+          
+          ### **2. Risk Analysis**
+          *   **Environmental Risk (Home): [STATUS]**
+              [Analysis based on home-related answers]
+          *   **Social & Peer Risk: [STATUS]**
+              [Analysis based on playground/friend-related answers]
+          *   **School-Based Anxiety & Authority Avoidance: [STATUS]**
+              [Analysis based on teacher/classroom-related answers]
+          *   **Emotional Regulation Risk: [STATUS]**
+              [Analysis based on mood/frustration-related answers]
+          *   **Sleep/Well-being Risk: [STATUS]**
+              [Analysis based on morning/night-related answers]
+          
+          ### **3. Guidance & Intervention Plan**
+          **For the School Counselor/Administrator:**
+          *   [Specific action items]
+          
+          **For the Teacher:**
+          *   [Specific action items]
+          
+          **For the Parents/Guardians:**
+          *   [Specific action items]
+          
+          ### **4. Verdict**
+          **Status: [FINAL VERDICT STATUS]**
+          [Final concluding statement and urgency level]
+          
+          Ensure Category 4 (RED FLAGS) is addressed with extreme vigilance.
         `;
 
         const response = await ai.models.generateContent({

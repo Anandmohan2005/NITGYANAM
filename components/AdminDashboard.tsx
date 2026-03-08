@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Submission, UserRole, User, Question } from '../types';
 import { api } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -254,18 +255,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                   )}
 
                   <div className="prose prose-slate prose-xl max-w-none">
-                    <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed border-l-4 border-slate-100 pl-10 py-4 min-h-[200px] flex items-center justify-center">
+                    <div className="font-medium text-slate-700 leading-relaxed border-l-4 border-slate-100 pl-10 py-4 min-h-[200px]">
                       {isRegenerating ? (
-                        <div className="flex flex-col items-center space-y-4">
+                        <div className="flex flex-col items-center justify-center h-full space-y-4">
                           <div className="w-12 h-12 border-4 border-wellBeingBlue border-t-transparent rounded-full animate-spin" />
                           <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-xs animate-pulse">
                             Generating Clinical Synthesis...
                           </p>
                         </div>
                       ) : selectedSubmission.aiReport ? (
-                        selectedSubmission.aiReport
+                        <div className="markdown-body">
+                          <ReactMarkdown>{selectedSubmission.aiReport}</ReactMarkdown>
+                        </div>
                       ) : (
-                        <div className="text-center space-y-4">
+                        <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
                           <p className="text-slate-300 italic">No analysis found for this record.</p>
                           <button 
                             onClick={handleRegenerate}
