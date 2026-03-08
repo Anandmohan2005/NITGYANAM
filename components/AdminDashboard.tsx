@@ -254,8 +254,27 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                   )}
 
                   <div className="prose prose-slate prose-xl max-w-none">
-                    <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed border-l-4 border-slate-100 pl-10 py-4">
-                      {selectedSubmission.aiReport ? selectedSubmission.aiReport : "Analyzing behavioral markers..."}
+                    <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed border-l-4 border-slate-100 pl-10 py-4 min-h-[200px] flex items-center justify-center">
+                      {isRegenerating ? (
+                        <div className="flex flex-col items-center space-y-4">
+                          <div className="w-12 h-12 border-4 border-wellBeingBlue border-t-transparent rounded-full animate-spin" />
+                          <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-xs animate-pulse">
+                            Generating Clinical Synthesis...
+                          </p>
+                        </div>
+                      ) : selectedSubmission.aiReport ? (
+                        selectedSubmission.aiReport
+                      ) : (
+                        <div className="text-center space-y-4">
+                          <p className="text-slate-300 italic">No analysis found for this record.</p>
+                          <button 
+                            onClick={handleRegenerate}
+                            className="text-wellBeingBlue font-black uppercase tracking-widest text-[10px] hover:underline"
+                          >
+                            Click "Regenerate Analysis" to start
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

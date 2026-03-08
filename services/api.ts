@@ -233,9 +233,10 @@ export const api = {
         model: 'gemini-3-flash-preview',
         contents: promptText,
         config: { 
-          temperature: 0.6,
-          topP: 0.9,
-          topK: 40
+          temperature: 0.7,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 1024
         }
       });
       
