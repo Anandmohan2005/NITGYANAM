@@ -159,102 +159,123 @@ export const api = {
       return "CRITICAL: GEMINI_API_KEY is missing from environment variables.";
     }
 
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      const answerEntries = Object.entries(submission.answers || {});
-      const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
-        const q = questions.find(q => q.id === qid);
-        const opt = q?.options.find(o => o.id === ans.optionId);
-        return `[Indicator: ${ans.indicator}] Q: ${q?.textEn} -> Answer: "${opt?.en}"`;
-      }).join('\n');
+    const maxRetries = 2;
+    let attempt = 0;
 
-      let ageSpecificGuidelines = "";
-      if (submission.level === WellBeingLevel.LEVEL_1) {
-        ageSpecificGuidelines = `
-          FOCUS: Std 1 to 3
-          - BEHAVIOUR: Social circle (friends), school attitude, patience/impulse control.
-          - MENTAL HEALTH: Morning mindset, self-image.
-          - CONCERN: Isolation signs, home belonging.
-          - RED FLAGS: Trauma markers, total emotional shutdown.
-        `;
-      } else if (submission.level === WellBeingLevel.LEVEL_2) {
-        ageSpecificGuidelines = `
-          FOCUS: Std 4 to 6
-          - BEHAVIOUR: Academic anxiety, focus deficit, support-seeking.
-          - MENTAL HEALTH: Internal battery (burnout), life narrative (adventure vs tragedy).
-          - CONCERN: School as "prison", social paranoia, parentification.
-          - RED FLAGS: Anhedonia, dissociation, lack of future hope.
-        `;
-      } else if (submission.level === WellBeingLevel.LEVEL_3) {
-        ageSpecificGuidelines = `
-          FOCUS: Std 7 to 8
-          - BEHAVIOUR: Authenticity vs Masking, digital comparison (Social Media).
-          - MENTAL HEALTH: Body image, somatic stress (Psychomotor Retardation).
-          - CONCERN: Rejection sensitivity, parent-child bond quality.
-          - RED FLAGS: Suicidal ideation (Critical), self-harm, severe panic.
-        `;
-      } else if (submission.level === WellBeingLevel.LEVEL_4) {
-        ageSpecificGuidelines = `
-          FOCUS: Std 9 to 10
-          - BEHAVIOUR: Executive function (Planning vs Paralysis), digital dependency.
-          - MENTAL HEALTH: Academic burnout (Battery empty), Somatization (Headaches/Shakiness due to results), Self-loathing.
-          - CONCERN: Social Masking (Imposter Syndrome), Rejection sensitivity, Home as "Pressure Cooker".
-          - RED FLAGS: Intense Hopelessness (Future looks dark/blank), Emotional Blunting (Robot/Numbness), Dissociation (Floating), Learned Helplessness.
-        `;
-      }
+    const executeAnalysis = async (): Promise<string> => {
+      try {
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const answerEntries = Object.entries(submission.answers || {});
+        const answerSummary = answerEntries.map(([qid, ans]: [string, any]) => {
+          const q = questions.find(q => q.id === qid);
+          const opt = q?.options.find(o => o.id === ans.optionId);
+          return `[Indicator: ${ans.indicator}] Q: ${q?.textEn} -> Answer: "${opt?.en}"`;
+        }).join('\n');
 
-      const promptText = `
-        Act as a Senior Clinical Psychologist and EdTech Specialist for Student. 
-        Analyze the following student assessment data using our 4-Category Clinical Framework.
-
-        FRAMEWORK CATEGORIES:
-        1. BEHAVIOUR PATTERN: Interaction, executive habits, and social discipline.
-        2. MENTAL HEALTH (INTERNAL STATE): Internal mood, somatic stress, and self-esteem.
-        3. CONCLUSION CONCERN: Environmental stressors and social insecurities.
-        4. IMMEDIATE ACTION (RED FLAGS): High-risk indicators (Trauma, clinical depression, hopelessness).
-
-        AGE-SPECIFIC ANALYSIS GUIDELINES:
-        ${ageSpecificGuidelines}
-
-        STUDENT CONTEXT:
-        Name: ${submission.student.name}
-        Grade: ${submission.student.standard} (${submission.level})
-        Overall Risk Status: ${submission.riskStatus}
-        
-        RAW FINDINGS (MCQ Responses):
-        ${answerSummary}
-
-        TASK:
-        Generate a comprehensive Clinical Synthesis Report. Ensure Category 4 (RED FLAGS) is addressed with extreme vigilance.
-      `;
-
-      // Switching to 'gemini-3-flash-preview' as it has much higher rate limits for the free tier.
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: promptText,
-        config: { 
-          temperature: 0.7,
-          topP: 0.8,
-          topK: 40,
-          maxOutputTokens: 1024
+        let ageSpecificGuidelines = "";
+        if (submission.level === WellBeingLevel.LEVEL_1) {
+          ageSpecificGuidelines = `
+            FOCUS: Std 1 to 3
+            - BEHAVIOUR: Social circle (friends), school attitude, patience/impulse control.
+            - MENTAL HEALTH: Morning mindset, self-image.
+            - CONCERN: Isolation signs, home belonging.
+            - RED FLAGS: Trauma markers, total emotional shutdown.
+          `;
+        } else if (submission.level === WellBeingLevel.LEVEL_2) {
+          ageSpecificGuidelines = `
+            FOCUS: Std 4 to 6
+            - BEHAVIOUR: Academic anxiety, focus deficit, support-seeking.
+            - MENTAL HEALTH: Internal battery (burnout), life narrative (adventure vs tragedy).
+            - CONCERN: School as "prison", social paranoia, parentification.
+            - RED FLAGS: Anhedonia, dissociation, lack of future hope.
+          `;
+        } else if (submission.level === WellBeingLevel.LEVEL_3) {
+          ageSpecificGuidelines = `
+            FOCUS: Std 7 to 8
+            - BEHAVIOUR: Authenticity vs Masking, digital comparison (Social Media).
+            - MENTAL HEALTH: Body image, somatic stress (Psychomotor Retardation).
+            - CONCERN: Rejection sensitivity, parent-child bond quality.
+            - RED FLAGS: Suicidal ideation (Critical), self-harm, severe panic.
+          `;
+        } else if (submission.level === WellBeingLevel.LEVEL_4) {
+          ageSpecificGuidelines = `
+            FOCUS: Std 9 to 10
+            - BEHAVIOUR: Executive function (Planning vs Paralysis), digital dependency.
+            - MENTAL HEALTH: Academic burnout (Battery empty), Somatization (Headaches/Shakiness due to results), Self-loathing.
+            - CONCERN: Social Masking (Imposter Syndrome), Rejection sensitivity, Home as "Pressure Cooker".
+            - RED FLAGS: Intense Hopelessness (Future looks dark/blank), Emotional Blunting (Robot/Numbness), Dissociation (Floating), Learned Helplessness.
+          `;
         }
-      });
-      
-      return response.text || "Diagnostic failure - Empty report.";
-    } catch (error: any) {
-      console.error("AI Analysis Error:", error);
-      
-      // Specific handling for leaked API key
-      if (error?.message?.includes("leaked") || error?.status === "PERMISSION_DENIED") {
-        return "Clinical Synthesis Error: Your API key was reported as leaked or is invalid. Please ensure you are using a valid API key from Google AI Studio and that it hasn't been exposed publicly.";
-      }
 
-      // Friendly message for quota errors
-      if (error?.message?.includes('429') || error?.message?.includes('quota')) {
-        return "Student System Alert: Clinical server is currently at peak capacity. Please wait 60 seconds and click 'Regenerate Analysis' to refresh this record.";
+        const promptText = `
+          Act as a Senior Clinical Psychologist and EdTech Specialist for Student. 
+          Analyze the following student assessment data using our 4-Category Clinical Framework.
+
+          FRAMEWORK CATEGORIES:
+          1. BEHAVIOUR PATTERN: Interaction, executive habits, and social discipline.
+          2. MENTAL HEALTH (INTERNAL STATE): Internal mood, somatic stress, and self-esteem.
+          3. CONCLUSION CONCERN: Environmental stressors and social insecurities.
+          4. IMMEDIATE ACTION (RED FLAGS): High-risk indicators (Trauma, clinical depression, hopelessness).
+
+          AGE-SPECIFIC ANALYSIS GUIDELINES:
+          ${ageSpecificGuidelines}
+
+          STUDENT CONTEXT:
+          Name: ${submission.student.name}
+          Grade: ${submission.student.standard} (${submission.level})
+          Overall Risk Status: ${submission.riskStatus}
+          
+          RAW FINDINGS (MCQ Responses):
+          ${answerSummary}
+
+          TASK:
+          Generate a comprehensive Clinical Synthesis Report. Ensure Category 4 (RED FLAGS) is addressed with extreme vigilance.
+        `;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-3-flash-preview',
+          contents: promptText,
+          config: { 
+            temperature: 0.7,
+            topP: 0.8,
+            topK: 40,
+            maxOutputTokens: 1024
+          }
+        });
+        
+        return response.text || "Diagnostic failure - Empty report.";
+      } catch (error: any) {
+        console.error(`AI Analysis Attempt ${attempt + 1} Error:`, error);
+        
+        const isUnavailable = error?.message?.includes('503') || error?.message?.includes('UNAVAILABLE');
+
+        if (isUnavailable && attempt < maxRetries) {
+          attempt++;
+          // Wait 3 seconds before retrying
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          return executeAnalysis();
+        }
+
+        // Specific handling for leaked API key
+        if (error?.message?.includes("leaked") || error?.status === "PERMISSION_DENIED") {
+          return "Clinical Synthesis Error: Your API key was reported as leaked or is invalid. Please ensure you are using a valid API key from Google AI Studio and that it hasn't been exposed publicly.";
+        }
+
+        // Friendly message for quota errors
+        if (error?.message?.includes('429') || error?.message?.includes('quota')) {
+          return "Student System Alert: Clinical server is currently at peak capacity. Please wait 60 seconds and click 'Regenerate Analysis' to refresh this record.";
+        }
+
+        // Handling for 503 UNAVAILABLE errors (High Demand)
+        if (isUnavailable) {
+          return "Clinical Synthesis Error: The AI server is currently experiencing extremely high demand. This is a temporary spike at Google's end. Please wait 10-20 seconds and click 'Regenerate Analysis' again.";
+        }
+
+        return `Clinical Synthesis Error: ${error?.message || "Internal failure"}`;
       }
-      return `Clinical Synthesis Error: ${error?.message || "Internal failure"}`;
-    }
+    };
+
+    return executeAnalysis();
   },
 
   analyzeResults: (answers: ResponseIndicator[]) => {
